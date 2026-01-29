@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-background">
@@ -9,12 +11,12 @@ export default function Home() {
             组件与交互动效。
           </p>
           <div className="flex gap-3">
-            <a
+            <Link
               className="inline-flex h-10 items-center justify-center rounded-md bg-foreground px-4 text-sm font-medium text-background hover:bg-foreground/90"
               href="/components/dot-pattern"
             >
               开始使用
-            </a>
+            </Link>
             <a
               className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted"
               href="https://ui.shadcn.com"
@@ -29,7 +31,7 @@ export default function Home() {
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">组件</h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            <a
+            <Link
               href="/components/dot-pattern"
               className="rounded-lg border p-6 transition hover:bg-muted"
             >
@@ -37,7 +39,7 @@ export default function Home() {
               <p className="mt-2 text-sm text-muted-foreground">
                 点阵背景图案组件，含预览/代码/安装/属性说明。
               </p>
-            </a>
+            </Link>
           </div>
         </section>
       </main>
