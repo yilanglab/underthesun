@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 
 import { CodeBlockClient } from "@/components/code-block-client";
@@ -16,6 +17,16 @@ const utilsSource = fs.readFileSync(
   path.join(process.cwd(), "src", "lib", "utils.ts"),
   "utf8"
 );
+
+const registryItemUrl =
+  "https://yilanglab.github.io/underthesun/r/dot-pattern.json";
+
+const installCli = {
+  pnpm: `pnpm dlx shadcn@latest add ${registryItemUrl}`,
+  npm: `npx shadcn@latest add ${registryItemUrl}`,
+  yarn: `yarn dlx shadcn@latest add ${registryItemUrl}`,
+  bun: `bunx shadcn@latest add ${registryItemUrl}`,
+};
 
 export default function DotPatternPage() {
   return (
@@ -38,16 +49,46 @@ export default function DotPatternPage() {
       <div className="mt-12 grid gap-8">
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">安装方式</h2>
-          <div className="space-y-2">
-            <div className="text-sm font-medium">1) 复制组件源码</div>
-            <CollapsibleCodeBlock collapsedHeight={220}>
-              <CodeBlockClient code={dotPatternSource} language="tsx" />
-            </CollapsibleCodeBlock>
-          </div>
-          <div className="space-y-2">
-            <div className="text-sm font-medium">2) 确保有 cn 工具函数</div>
-            <CodeBlockClient code={utilsSource} language="ts" />
-          </div>
+          <Tabs defaultValue="cli">
+            <TabsList>
+              <TabsTrigger value="cli">CLI</TabsTrigger>
+              <TabsTrigger value="manual">Manual</TabsTrigger>
+            </TabsList>
+            <TabsContent value="cli">
+              <Tabs defaultValue="pnpm">
+                <TabsList className="h-9">
+                  <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+                  <TabsTrigger value="npm">npm</TabsTrigger>
+                  <TabsTrigger value="yarn">yarn</TabsTrigger>
+                  <TabsTrigger value="bun">bun</TabsTrigger>
+                </TabsList>
+                <TabsContent value="pnpm">
+                  <CodeBlockClient code={installCli.pnpm} language="bash" />
+                </TabsContent>
+                <TabsContent value="npm">
+                  <CodeBlockClient code={installCli.npm} language="bash" />
+                </TabsContent>
+                <TabsContent value="yarn">
+                  <CodeBlockClient code={installCli.yarn} language="bash" />
+                </TabsContent>
+                <TabsContent value="bun">
+                  <CodeBlockClient code={installCli.bun} language="bash" />
+                </TabsContent>
+              </Tabs>
+            </TabsContent>
+            <TabsContent value="manual">
+              <div className="space-y-2">
+                <div className="text-sm font-medium">1) 复制组件源码</div>
+                <CollapsibleCodeBlock collapsedHeight={220}>
+                  <CodeBlockClient code={dotPatternSource} language="tsx" />
+                </CollapsibleCodeBlock>
+              </div>
+              <div className="space-y-2">
+                <div className="text-sm font-medium">2) 确保有 cn 工具函数</div>
+                <CodeBlockClient code={utilsSource} language="ts" />
+              </div>
+            </TabsContent>
+          </Tabs>
         </section>
 
         <section className="space-y-4">

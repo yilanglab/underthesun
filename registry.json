@@ -1,0 +1,24 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "underthesun",
+  "homepage": "https://yilanglab.github.io/underthesun/",
+  "items": [
+    {
+      "name": "dot-pattern",
+      "type": "registry:ui",
+      "title": "Dot Pattern",
+      "description": "Dot grid background pattern component.",
+      "dependencies": ["clsx", "tailwind-merge"],
+      "files": [
+        {
+          "path": "registry/ui/dot-pattern.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/lib/utils.ts",
+          "type": "registry:lib"
+        }
+      ]
+    }
+  ]
+}
