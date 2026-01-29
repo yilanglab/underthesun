@@ -1,3 +1,5 @@
+"use client";
+
 import { DotPattern } from "@/registry/ui/dot-pattern";
 
 type NumberInputProps = {
@@ -73,13 +75,13 @@ export function DotPatternPlayground({
           cr={cr}
         />
         <div className="relative z-10 flex h-full items-center justify-center">
-          <div className="rounded-md border bg-background px-4 py-2 text-sm">
+          <div className="rounded-md border bg-background px-4 py-2 text-sm shadow-sm">
             DotPattern Playground
           </div>
         </div>
       </div>
 
-      <div className="space-y-4 rounded-lg border bg-muted/30 p-4">
+      <div className="space-y-4 rounded-lg border bg-zinc-50/50 p-4">
         <div className="text-sm font-medium">参数调试</div>
         <div className="grid gap-3">
           <NumberInput label="width" value={width} min={4} step={1} onChange={onWidthChange} />

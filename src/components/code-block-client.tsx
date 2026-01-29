@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { codeToHtml } from "shiki/bundle/web";
 
 import { CopyButton } from "@/components/copy-button";
+import { cn } from "@/lib/utils";
 
 type CodeBlockClientProps = {
   code: string;
@@ -22,7 +23,7 @@ export function CodeBlockClient({
 
   useEffect(() => {
     let active = true;
-    codeToHtml(code, { lang: language, theme: "github-dark" }).then((output) => {
+    codeToHtml(code, { lang: language, theme: "github-light" }).then((output) => {
       if (active) setHtml(output);
     });
     return () => {
@@ -31,13 +32,13 @@ export function CodeBlockClient({
   }, [code, language]);
 
   return (
-    <div className={`relative ${className ?? ""}`}>
+    <div className={cn("relative rounded-lg border bg-zinc-50/50", className)}>
       <CopyButton
         text={copyText ?? code}
-        className="absolute right-3 top-3 h-8 w-8"
+        className="absolute right-3 top-3 h-8 w-8 text-muted-foreground hover:bg-zinc-200"
       />
       <div
-        className="overflow-x-auto rounded-lg border bg-zinc-950 p-4 text-sm text-zinc-100"
+        className="overflow-x-auto p-4 text-sm [&>pre]:bg-transparent! [&>pre]:p-0!"
         dangerouslySetInnerHTML={{
           __html: html || `<pre><code>${code}</code></pre>`,
         }}

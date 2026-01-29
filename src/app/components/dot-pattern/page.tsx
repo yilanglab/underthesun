@@ -3,7 +3,7 @@ import path from "node:path";
 
 import Link from "next/link";
 
-import { CodeBlock } from "@/components/code-block";
+import { CodeBlockClient } from "@/components/code-block-client";
 import { CollapsibleCodeBlock } from "@/components/collapsible-code-block";
 import { DotPatternPlaygroundTabs } from "@/components/dot-pattern-playground-tabs";
 
@@ -41,12 +41,12 @@ export default function DotPatternPage() {
           <div className="space-y-2">
             <div className="text-sm font-medium">1) 复制组件源码</div>
             <CollapsibleCodeBlock collapsedHeight={220}>
-              <CodeBlock code={dotPatternSource} language="tsx" />
+              <CodeBlockClient code={dotPatternSource} language="tsx" />
             </CollapsibleCodeBlock>
           </div>
           <div className="space-y-2">
             <div className="text-sm font-medium">2) 确保有 cn 工具函数</div>
-            <CodeBlock code={utilsSource} language="ts" />
+            <CodeBlockClient code={utilsSource} language="ts" />
           </div>
         </section>
 

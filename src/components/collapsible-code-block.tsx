@@ -20,7 +20,7 @@ export function CollapsibleCodeBlock({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("relative rounded-lg border bg-zinc-50/50", className)}>
       <div
         className={cn("transition-[max-height] duration-200", !expanded && "overflow-hidden")}
         style={expanded ? undefined : { maxHeight: `${collapsedHeight}px` }}
@@ -28,14 +28,14 @@ export function CollapsibleCodeBlock({
         {children}
       </div>
       {!expanded && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-background to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-zinc-50 to-transparent" />
       )}
       <div className="absolute inset-x-0 bottom-0 flex justify-center pb-2">
         <Button
           type="button"
-          variant="secondary"
+          variant="ghost"
           size="icon"
-          className="h-8 w-8"
+          className="h-8 w-8 hover:bg-zinc-200"
           aria-expanded={expanded}
           onClick={() => setExpanded((prev) => !prev)}
         >

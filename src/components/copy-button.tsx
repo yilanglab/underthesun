@@ -26,7 +26,7 @@ export function CopyButton({ text, className }: CopyButtonProps) {
   return (
     <Button
       type="button"
-      variant="outline"
+      variant="ghost"
       size="icon"
       className={className}
       aria-label={copied ? "Copied" : "Copy"}
