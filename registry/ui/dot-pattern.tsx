@@ -44,7 +44,7 @@ export function DotPattern({
   const gradientId = `${id}-gradient`;
   const offset = mode === "staggered" ? { x: width / 2, y: height / 2 } : null;
   const size = cr * 2;
-  const currentStrokeWidth = strokeWidth || Math.max(cr / 2, 0.5);
+  const currentStrokeWidth = strokeWidth || 1; // Default to 1px if not provided
 
   const getGradientStops = () => {
     switch (fadeLevel) {

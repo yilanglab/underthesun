@@ -17,6 +17,7 @@ function buildUsageCode(values: DotPatternParams) {
     cy,
     cr,
     shape,
+    strokeWidth,
     mode,
     color,
     opacity,
@@ -35,7 +36,11 @@ export function DotPatternDemo() {
         y={${y}}
         cx={${cx}}
         cy={${cy}}
-        cr={${cr}}
+        cr={${cr}}${
+    shape === "cross" && strokeWidth !== 1
+      ? `\n        strokeWidth={${strokeWidth}}`
+      : ""
+  }
         shape="${shape}"
         mode="${mode}"
         color="${color}"
