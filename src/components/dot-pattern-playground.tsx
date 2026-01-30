@@ -1,8 +1,14 @@
 "use client";
 
-import { Settings2 } from "lucide-react";
+import { Settings2, Figma } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { DotPattern } from "@/registry/ui/dot-pattern";
 import { DotPatternParams } from "@/components/dot-pattern-params-panel";
 
@@ -17,6 +23,75 @@ export function DotPatternPlayground({
   onTogglePanel,
   isPanelOpen,
 }: DotPatternPlaygroundProps) {
+  const createPatternPng = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = params.width;
+    canvas.height = params.height;
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) return;
+
+    // Draw background (transparent by default, so we don't need to clear or fill)
+
+    // Calculate dimensions
+    const cr = params.cr;
+    const cx = params.cx;
+    const cy = params.cy;
+    const size = cr * 2;
+    const strokeWidth = params.strokeWidth || 1;
+    const maxStroke = Math.max(cr / 2, 0.5); // Fallback logic for non-cross, though not used for cross anymore
+
+    ctx.fillStyle = params.color;
+    ctx.strokeStyle = params.color;
+    ctx.globalAlpha = params.opacity;
+
+    // Helper to render shape
+    const renderShape = (offsetX: number, offsetY: number) => {
+      ctx.save();
+      ctx.translate(offsetX, offsetY);
+
+      if (params.shape === "square") {
+        ctx.fillRect(cx - cr, cy - cr, size, size);
+      } else if (params.shape === "cross") {
+        ctx.lineWidth = strokeWidth;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        // Use params.strokeWidth or default 1
+        const sw = strokeWidth;
+        
+        // Vertical line
+        ctx.moveTo(cx, cy - cr);
+        ctx.lineTo(cx, cy + cr);
+        
+        // Horizontal line
+        ctx.moveTo(cx - cr, cy);
+        ctx.lineTo(cx + cr, cy);
+        
+        ctx.stroke();
+      } else {
+        // Circle
+        ctx.beginPath();
+        ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    };
+
+    // Draw main shape
+    renderShape(0, 0);
+
+    // Draw offset shape if staggered
+    if (params.mode === "staggered") {
+      renderShape(params.width / 2, params.height / 2);
+    }
+
+    // Trigger download
+    const link = document.createElement("a");
+    link.download = `dot-pattern-${params.width}x${params.height}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
+
   return (
     <div className="relative h-[320px] w-full overflow-hidden rounded-lg border bg-background">
       <DotPattern
@@ -40,16 +115,44 @@ export function DotPatternPlayground({
           DotPattern Playground
         </div>
       </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        className={`absolute right-4 top-4 z-20 h-8 w-8 bg-background/50 backdrop-blur-sm hover:bg-background/80 ${
-          isPanelOpen ? "bg-muted text-foreground" : ""
-        }`}
-        onClick={onTogglePanel}
-      >
-        <Settings2 className="h-4 w-4" />
-      </Button>
+      
+      <div className="absolute right-4 top-4 z-20 flex gap-2">
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 bg-background/50 backdrop-blur-sm hover:bg-background/80"
+                onClick={createPatternPng}
+              >
+                <Figma className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>纹理下载</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`h-8 w-8 bg-background/50 backdrop-blur-sm hover:bg-background/80 ${
+                  isPanelOpen ? "bg-muted text-foreground" : ""
+                }`}
+                onClick={onTogglePanel}
+              >
+                <Settings2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>参数调试</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
     </div>
   );
 }
