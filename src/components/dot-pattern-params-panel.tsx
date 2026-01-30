@@ -90,6 +90,8 @@ type LinkedSliderRowProps = {
   value2: number;
   min: number;
   max: number;
+  max1?: number;
+  max2?: number;
   step: number;
   onChange1: (value: number) => void;
   onChange2: (value: number) => void;
@@ -103,6 +105,8 @@ function LinkedSliderRow({
   value2,
   min,
   max,
+  max1,
+  max2,
   step,
   onChange1,
   onChange2,
@@ -130,7 +134,7 @@ function LinkedSliderRow({
         label={label1}
         value={value1}
         min={min}
-        max={max}
+        max={max1 ?? max}
         step={step}
         onChange={handleChange1}
       />
@@ -155,7 +159,7 @@ function LinkedSliderRow({
         label={label2}
         value={value2}
         min={min}
-        max={max}
+        max={max2 ?? max}
         step={step}
         onChange={handleChange2}
       />
@@ -262,6 +266,21 @@ export function DotPatternParamsPanel({
   onParamChange,
   onReset,
 }: DotPatternParamsPanelProps) {
+  const maxCx = Math.max(params.width / 2, 0);
+  const maxCy = Math.max(params.height / 2, 0);
+
+  useEffect(() => {
+    if (params.cx > maxCx) {
+      onParamChange("cx", maxCx);
+    }
+  }, [params.cx, maxCx, onParamChange]);
+
+  useEffect(() => {
+    if (params.cy > maxCy) {
+      onParamChange("cy", maxCy);
+    }
+  }, [params.cy, maxCy, onParamChange]);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -410,7 +429,9 @@ export function DotPatternParamsPanel({
                   label2="CY"
                   value2={params.cy}
                   min={0}
-                  max={10}
+                  max={Math.max(maxCx, maxCy)}
+                  max1={maxCx}
+                  max2={maxCy}
                   step={0.5}
                   onChange1={(val) => onParamChange("cx", val)}
                   onChange2={(val) => onParamChange("cy", val)}

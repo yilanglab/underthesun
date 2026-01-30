@@ -28,6 +28,7 @@ export function DotPatternPlayground({
         cy={params.cy}
         cr={params.cr}
         shape={params.shape}
+        strokeWidth={params.strokeWidth}
         mode={params.mode}
         color={params.color}
         opacity={params.opacity}
