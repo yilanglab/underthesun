@@ -11,6 +11,7 @@ type DotPatternProps = {
   cy?: number;
   cr?: number;
   shape?: "circle" | "square" | "cross";
+  strokeWidth?: number;
   mode?: "orthogonal" | "staggered";
   color?: string;
   opacity?: number;
@@ -29,6 +30,7 @@ export function DotPattern({
   cy = 1,
   cr = 1,
   shape = "circle",
+  strokeWidth,
   mode = "orthogonal",
   color = "#000000",
   opacity = 0.05,
@@ -42,7 +44,7 @@ export function DotPattern({
   const gradientId = `${id}-gradient`;
   const offset = mode === "staggered" ? { x: width / 2, y: height / 2 } : null;
   const size = cr * 2;
-  const strokeWidth = Math.max(cr / 2, 0.5);
+  const currentStrokeWidth = strokeWidth || Math.max(cr / 2, 0.5);
 
   const getGradientStops = () => {
     switch (fadeLevel) {
@@ -94,7 +96,7 @@ export function DotPattern({
 
     if (shape === "cross") {
       return (
-        <g stroke={color} strokeOpacity={opacity} strokeWidth={strokeWidth}>
+        <g stroke={color} strokeOpacity={opacity} strokeWidth={currentStrokeWidth}>
           <line
             x1={cx - cr + offsetX}
             y1={cy + offsetY}

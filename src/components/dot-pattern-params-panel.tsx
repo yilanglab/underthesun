@@ -53,7 +53,7 @@ function SliderRow({ label, value, min, max, step, onChange }: SliderRowProps) {
         <div className="relative group w-16 text-right">
           {!isEditing ? (
             <span
-              className="block text-xs font-mono tabular-nums cursor-text hover:ring-1 hover:ring-input rounded px-1 py-0.5"
+              className="block w-full text-xs font-mono tabular-nums cursor-text border border-transparent hover:border-input rounded px-1 py-0.5"
               onClick={() => setIsEditing(true)}
             >
               {value}
@@ -62,7 +62,7 @@ function SliderRow({ label, value, min, max, step, onChange }: SliderRowProps) {
             <input
               autoFocus
               type="number"
-              className="w-full text-right text-xs bg-background border rounded px-1 py-0.5 outline-none font-mono tabular-nums [&::-webkit-inner-spin-button]:appearance-none"
+              className="w-full text-right text-xs bg-background border border-input rounded px-1 py-0.5 outline-none font-mono tabular-nums [&::-webkit-inner-spin-button]:appearance-none"
               value={localValue}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
@@ -208,6 +208,7 @@ export type DotPatternParams = {
   cy: number;
   cr: number;
   shape: "circle" | "square" | "cross";
+  strokeWidth: number;
   mode: "orthogonal" | "staggered";
   color: string;
   opacity: number;
@@ -224,6 +225,7 @@ export const DEFAULT_PARAMS: DotPatternParams = {
   cy: 1,
   cr: 1,
   shape: "circle",
+  strokeWidth: 0, // 0 means default dynamic behavior
   mode: "orthogonal",
   color: "#000000",
   opacity: 0.05,
@@ -415,13 +417,24 @@ export function DotPatternParamsPanel({
                 />
 
                 <SliderRow
-                  label="Radius"
+                  label={params.shape === "circle" ? "Radius" : "Size"}
                   value={params.cr}
                   min={0.5}
                   max={10}
                   step={0.5}
                   onChange={(val) => onParamChange("cr", val)}
                 />
+
+                {params.shape === "cross" && (
+                  <SliderRow
+                    label="Stroke Width"
+                    value={params.strokeWidth}
+                    min={0}
+                    max={5}
+                    step={0.5}
+                    onChange={(val) => onParamChange("strokeWidth", val)}
+                  />
+                )}
 
                 <LinkedSliderRow
                   label1="X Offset"
