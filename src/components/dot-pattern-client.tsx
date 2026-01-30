@@ -190,6 +190,12 @@ export function DotPatternClient({
                       <td className="px-4 py-2">是否启用边缘渐隐</td>
                     </tr>
                     <tr className="border-t">
+                      <td className="px-4 py-2">fadeLevel</td>
+                      <td className="px-4 py-2">enum</td>
+                      <td className="px-4 py-2">weak</td>
+                      <td className="px-4 py-2">渐隐强度：weak / medium / strong</td>
+                    </tr>
+                    <tr className="border-t">
                       <td className="px-4 py-2">className</td>
                       <td className="px-4 py-2">string</td>
                       <td className="px-4 py-2">-</td>

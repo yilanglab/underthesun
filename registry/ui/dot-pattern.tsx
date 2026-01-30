@@ -15,6 +15,7 @@ type DotPatternProps = {
   color?: string;
   opacity?: number;
   fade?: boolean;
+  fadeLevel?: "weak" | "medium" | "strong";
   className?: string;
   [key: string]: unknown;
 };
@@ -32,6 +33,7 @@ export function DotPattern({
   color = "#000000",
   opacity = 0.05,
   fade = false,
+  fadeLevel = "weak",
   className,
   ...props
 }: DotPatternProps) {
@@ -41,6 +43,40 @@ export function DotPattern({
   const offset = mode === "staggered" ? { x: width / 2, y: height / 2 } : null;
   const size = cr * 2;
   const strokeWidth = Math.max(cr / 2, 0.5);
+
+  const getGradientStops = () => {
+    switch (fadeLevel) {
+      case "strong":
+        // 由中心到最近边衰减 (更强的渐隐)
+        return (
+          <>
+            <stop offset="0%" stopColor="white" stopOpacity="1" />
+            <stop offset="30%" stopColor="white" stopOpacity="1" />
+            <stop offset="70%" stopColor="white" stopOpacity="0" />
+          </>
+        );
+      case "medium":
+        // 由中心到最远边衰减 (中等渐隐)
+        return (
+          <>
+            <stop offset="0%" stopColor="white" stopOpacity="1" />
+            <stop offset="50%" stopColor="white" stopOpacity="1" />
+            <stop offset="90%" stopColor="white" stopOpacity="0" />
+          </>
+        );
+      case "weak":
+      default:
+        // 由中心到四角衰减 (弱渐隐 - 现有逻辑)
+        return (
+          <>
+            <stop offset="0%" stopColor="white" stopOpacity="1" />
+            <stop offset="70%" stopColor="white" stopOpacity="1" />
+            <stop offset="100%" stopColor="white" stopOpacity="0" />
+          </>
+        );
+    }
+  };
+
 
   const renderShape = (offsetX = 0, offsetY = 0) => {
     if (shape === "square") {
@@ -114,9 +150,7 @@ export function DotPattern({
         {fade ? (
           <>
             <radialGradient id={gradientId} cx="50%" cy="50%" r="70%">
-              <stop offset="0%" stopColor="white" stopOpacity="1" />
-              <stop offset="70%" stopColor="white" stopOpacity="1" />
-              <stop offset="100%" stopColor="white" stopOpacity="0" />
+              {getGradientStops()}
             </radialGradient>
             <mask id={maskId}>
               <rect width="100%" height="100%" fill={`url(#${gradientId})`} />

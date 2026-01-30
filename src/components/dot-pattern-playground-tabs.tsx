@@ -8,8 +8,21 @@ import { DotPatternParams } from "@/components/dot-pattern-params-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function buildUsageCode(values: DotPatternParams) {
-  const { width, height, x, y, cx, cy, cr, shape, mode, color, opacity, fade } =
-    values;
+  const {
+    width,
+    height,
+    x,
+    y,
+    cx,
+    cy,
+    cr,
+    shape,
+    mode,
+    color,
+    opacity,
+    fade,
+    fadeLevel,
+  } = values;
   return `import { DotPattern } from "@/registry/ui/dot-pattern";
 
 export function DotPatternDemo() {
@@ -27,7 +40,9 @@ export function DotPatternDemo() {
         mode="${mode}"
         color="${color}"
         opacity={${opacity}}
-        fade={${fade}}
+        fade={${fade}}${
+    fade ? `\n        fadeLevel="${fadeLevel}"` : ""
+  }
       />
     </div>
   );

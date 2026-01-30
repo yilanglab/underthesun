@@ -32,6 +32,7 @@ export function DotPatternPlayground({
         color={params.color}
         opacity={params.opacity}
         fade={params.fade}
+        fadeLevel={params.fadeLevel}
       />
       <div className="relative z-10 flex h-full items-center justify-center">
         <div className="rounded-md border bg-background px-4 py-2 text-sm shadow-sm">
