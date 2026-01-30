@@ -50,21 +50,19 @@ function SliderRow({ label, value, min, max, step, onChange }: SliderRowProps) {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-muted-foreground">{label}</span>
-        <div className="relative group">
-          <span
-            className={cn(
-              "text-xs font-mono tabular-nums cursor-text hover:text-foreground/80",
-              isEditing ? "opacity-0" : "opacity-100"
-            )}
-            onClick={() => setIsEditing(true)}
-          >
-            {value}
-          </span>
-          {isEditing && (
+        <div className="relative group w-16 text-right">
+          {!isEditing ? (
+            <span
+              className="block text-xs font-mono tabular-nums cursor-text hover:ring-1 hover:ring-input rounded px-1 py-0.5"
+              onClick={() => setIsEditing(true)}
+            >
+              {value}
+            </span>
+          ) : (
             <input
               autoFocus
               type="number"
-              className="absolute inset-0 w-16 -right-1 text-right text-xs bg-background border rounded px-1 outline-none"
+              className="w-full text-right text-xs bg-background border rounded px-1 py-0.5 outline-none font-mono tabular-nums [&::-webkit-inner-spin-button]:appearance-none"
               value={localValue}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
@@ -140,7 +138,10 @@ function LinkedSliderRow({
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 text-muted-foreground hover:text-foreground"
+          className={cn(
+            "h-6 w-6 text-muted-foreground hover:text-foreground transition-colors",
+            isLocked && "bg-muted text-foreground"
+          )}
           onClick={() => setIsLocked(!isLocked)}
         >
           {isLocked ? (
@@ -178,7 +179,7 @@ function ButtonGroup<T extends string>({
   return (
     <div className="space-y-2">
       <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      <div className="flex p-1 bg-muted/50 rounded-lg border">
+      <div className="flex p-1 bg-muted/50 rounded-lg">
         {options.map((option) => (
           <button
             key={option.value}
