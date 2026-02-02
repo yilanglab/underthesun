@@ -4,6 +4,12 @@ import { Settings2, Figma } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -23,15 +29,16 @@ export function DotPatternPlayground({
   onTogglePanel,
   isPanelOpen,
 }: DotPatternPlaygroundProps) {
-  const createPatternPng = () => {
+  const createPatternPng = (scale: number) => {
     const canvas = document.createElement("canvas");
-    canvas.width = params.width;
-    canvas.height = params.height;
+    canvas.width = params.width * scale;
+    canvas.height = params.height * scale;
     const ctx = canvas.getContext("2d");
 
     if (!ctx) return;
 
     // Draw background (transparent by default, so we don't need to clear or fill)
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
 
     // Calculate dimensions
     const cr = params.cr;
@@ -39,7 +46,6 @@ export function DotPatternPlayground({
     const cy = params.cy;
     const size = cr * 2;
     const strokeWidth = params.strokeWidth || 1;
-    const maxStroke = Math.max(cr / 2, 0.5); // Fallback logic for non-cross, though not used for cross anymore
 
     ctx.fillStyle = params.color;
     ctx.strokeStyle = params.color;
@@ -56,9 +62,6 @@ export function DotPatternPlayground({
         ctx.lineWidth = strokeWidth;
         ctx.lineCap = "round";
         ctx.beginPath();
-        // Use params.strokeWidth or default 1
-        const sw = strokeWidth;
-        
         // Vertical line
         ctx.moveTo(cx, cy - cr);
         ctx.lineTo(cx, cy + cr);
@@ -87,7 +90,7 @@ export function DotPatternPlayground({
 
     // Trigger download
     const link = document.createElement("a");
-    link.download = `dot-pattern-${params.width}x${params.height}.png`;
+    link.download = `dot-pattern-${params.width}x${params.height}@${scale}x.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
   };
@@ -118,21 +121,38 @@ export function DotPatternPlayground({
       
       <div className="absolute right-4 top-4 z-20 flex gap-2">
         <TooltipProvider delayDuration={0}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 bg-background/50 backdrop-blur-sm hover:bg-background/80"
-                onClick={createPatternPng}
-              >
-                <Figma className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>纹理下载</p>
-            </TooltipContent>
-          </Tooltip>
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 bg-background/50 backdrop-blur-sm hover:bg-background/80"
+                  >
+                    <Figma className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>纹理下载</p>
+              </TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent align="end" className="w-20">
+              <DropdownMenuItem onClick={() => createPatternPng(1)}>
+                1x
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => createPatternPng(2)}>
+                2x
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => createPatternPng(4)}>
+                4x
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => createPatternPng(8)}>
+                8x
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <Tooltip>
             <TooltipTrigger asChild>
