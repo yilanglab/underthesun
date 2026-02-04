@@ -196,6 +196,24 @@ export function DotPatternClient({
                       <td className="px-4 py-2">渐隐强度：weak / medium / strong</td>
                     </tr>
                     <tr className="border-t">
+                      <td className="px-4 py-2">effect</td>
+                      <td className="px-4 py-2">enum</td>
+                      <td className="px-4 py-2">none</td>
+                      <td className="px-4 py-2">动效：none / glow / scan / pulse</td>
+                    </tr>
+                    <tr className="border-t">
+                      <td className="px-4 py-2">effectPlaying</td>
+                      <td className="px-4 py-2">boolean</td>
+                      <td className="px-4 py-2">false</td>
+                      <td className="px-4 py-2">是否播放效果动画</td>
+                    </tr>
+                    <tr className="border-t">
+                      <td className="px-4 py-2">hover</td>
+                      <td className="px-4 py-2">boolean</td>
+                      <td className="px-4 py-2">false</td>
+                      <td className="px-4 py-2">是否启用鼠标交互效果</td>
+                    </tr>
+                    <tr className="border-t">
                       <td className="px-4 py-2">className</td>
                       <td className="px-4 py-2">string</td>
                       <td className="px-4 py-2">-</td>

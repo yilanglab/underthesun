@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Lock, Unlock } from "lucide-react";
+import { X, Lock, Unlock, Play, Pause } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 
@@ -218,6 +218,9 @@ export type DotPatternParams = {
   opacity: number;
   fade: boolean;
   fadeLevel: "weak" | "medium" | "strong";
+  effect: "none" | "glow" | "scan" | "pulse";
+  effectPlaying: boolean;
+  hover: boolean;
 };
 
 export const DEFAULT_PARAMS: DotPatternParams = {
@@ -235,6 +238,9 @@ export const DEFAULT_PARAMS: DotPatternParams = {
   opacity: 0.05,
   fade: false,
   fadeLevel: "weak",
+  effect: "none",
+  effectPlaying: false,
+  hover: false,
 };
 
 type DotPatternParamsPanelProps = {
@@ -468,6 +474,63 @@ export function DotPatternParamsPanel({
                   onChange1={(val) => onParamChange("x", val)}
                   onChange2={(val) => onParamChange("y", val)}
                 />
+              </div>
+
+              <div className="h-px bg-border/50" />
+
+              {/* Effects Section */}
+              <div className="space-y-5">
+                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Effects
+                </h4>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">Effect Type</span>
+                    {params.effect !== "none" && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => onParamChange("effectPlaying", !params.effectPlaying)}
+                        title={params.effectPlaying ? "Pause" : "Play"}
+                      >
+                        {params.effectPlaying ? (
+                          <Pause className="h-3 w-3 fill-current" />
+                        ) : (
+                          <Play className="h-3 w-3 fill-current" />
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                  <ButtonGroup
+                    label=""
+                    value={params.effect}
+                    options={[
+                      { label: "None", value: "none" },
+                      { label: "Glow", value: "glow" },
+                      { label: "Scan", value: "scan" },
+                      { label: "Pulse", value: "pulse" },
+                    ]}
+                    onChange={(val) => {
+                      onParamChange("effect", val);
+                      // Auto-play when selecting an effect
+                      if (val !== "none") {
+                        onParamChange("effectPlaying", true);
+                      }
+                    }}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
+                  <span className="text-muted-foreground">Interactive Hover</span>
+                  <input
+                    type="checkbox"
+                    checked={params.hover}
+                    onChange={(e) => onParamChange("hover", e.target.checked)}
+                    className="h-4 w-4 rounded border-input bg-background text-primary focus:ring-offset-background"
+                  />
+                </div>
               </div>
             </div>
           </div>

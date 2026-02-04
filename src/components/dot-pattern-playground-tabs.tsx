@@ -23,6 +23,9 @@ function buildUsageCode(values: DotPatternParams) {
     opacity,
     fade,
     fadeLevel,
+    effect,
+    effectPlaying,
+    hover,
   } = values;
   return `import { DotPattern } from "@/registry/ui/dot-pattern";
 
@@ -47,6 +50,12 @@ export function DotPatternDemo() {
         opacity={${opacity}}
         fade={${fade}}${
     fade ? `\n        fadeLevel="${fadeLevel}"` : ""
+  }${
+    effect !== "none" ? `\n        effect="${effect}"` : ""
+  }${
+    effect !== "none" && effectPlaying ? `\n        effectPlaying={true}` : ""
+  }${
+    hover ? `\n        hover={true}` : ""
   }
       />
     </div>
