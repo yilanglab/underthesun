@@ -17,6 +17,7 @@ type DotPatternProps = {
   opacity?: number;
   fade?: boolean;
   fadeLevel?: "weak" | "medium" | "strong";
+  fadeReverse?: boolean;
   effect?: "glow" | "scan" | "pulse" | "none";
   effectPlaying?: boolean;
   effectMaxScale?: number;
@@ -51,6 +52,7 @@ export function DotPattern({
   opacity = 0.05,
   fade = false,
   fadeLevel = "weak",
+  fadeReverse = false,
   effect = "none",
   effectPlaying = false,
   effectMaxScale = 1.8,
@@ -78,7 +80,7 @@ export function DotPattern({
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [mousePos, setMousePos] = useState({ x: -9999, y: -9999 });
+  const mousePosRef = useRef({ x: -9999, y: -9999 }); // Use ref for performance and to avoid re-renders
   const trailGridRef = useRef<Float32Array | null>(null);
   const lastMousePos = useRef({ x: -9999, y: -9999 });
   const lastMouseTime = useRef(0);
@@ -231,7 +233,7 @@ export function DotPattern({
           // Hover effect
           if (hover) {
             // Calculate distance to mouse
-            const dist = Math.hypot(dotX - mousePos.x, dotY - mousePos.y);
+            const dist = Math.hypot(dotX - mousePosRef.current.x, dotY - mousePosRef.current.y);
             let instantHover = 0;
             
             if (dist < hoverRadius) {
@@ -374,8 +376,7 @@ export function DotPattern({
     width, height, x, y, cx, cy, cr, shape, strokeWidth, mode, color, opacity, 
     effect, effectPlaying, effectEase, effectMaxScale, effectMaxOpacity, effectSize, effectDuration, activeEffectColor,
     hover, hoverRadius, hoverTargetScale, hoverTargetOpacity, activeHoverColor, hoverTrail, hoverTrailDuration,
-    multiColor, multiColors,
-    mousePos
+    multiColor, multiColors, fade, fadeLevel, fadeReverse
   ]);
 
   // Update mouse position and calculate speed
@@ -398,11 +399,11 @@ export function DotPattern({
 
     lastMousePos.current = { x, y };
     lastMouseTime.current = now;
-    setMousePos({ x, y });
+    mousePosRef.current = { x, y };
   };
 
   const handleMouseLeave = () => {
-    setMousePos({ x: -9999, y: -9999 });
+    mousePosRef.current = { x: -9999, y: -9999 };
   };
 
   const getGradientStops = () => {
@@ -410,26 +411,28 @@ export function DotPattern({
       case "strong":
         return (
           <>
-            <stop offset="0%" stopColor="white" stopOpacity="1" />
-            <stop offset="30%" stopColor="white" stopOpacity="1" />
-            <stop offset="70%" stopColor="white" stopOpacity="0" />
+            <stop offset="0%" stopColor={fadeReverse ? "white" : "white"} stopOpacity={fadeReverse ? 0 : 1} />
+            <stop offset="30%" stopColor={fadeReverse ? "white" : "white"} stopOpacity={fadeReverse ? 0 : 1} />
+            <stop offset="70%" stopColor={fadeReverse ? "white" : "white"} stopOpacity={fadeReverse ? 1 : 0} />
+            <stop offset="100%" stopColor={fadeReverse ? "white" : "white"} stopOpacity={fadeReverse ? 1 : 0} />
           </>
         );
       case "medium":
         return (
           <>
-            <stop offset="0%" stopColor="white" stopOpacity="1" />
-            <stop offset="50%" stopColor="white" stopOpacity="1" />
-            <stop offset="90%" stopColor="white" stopOpacity="0" />
+            <stop offset="0%" stopColor="white" stopOpacity={fadeReverse ? 0 : 1} />
+            <stop offset="50%" stopColor="white" stopOpacity={fadeReverse ? 0 : 1} />
+            <stop offset="90%" stopColor="white" stopOpacity={fadeReverse ? 1 : 0} />
+            <stop offset="100%" stopColor="white" stopOpacity={fadeReverse ? 1 : 0} />
           </>
         );
       case "weak":
       default:
         return (
           <>
-            <stop offset="0%" stopColor="white" stopOpacity="1" />
-            <stop offset="70%" stopColor="white" stopOpacity="1" />
-            <stop offset="100%" stopColor="white" stopOpacity="0" />
+            <stop offset="0%" stopColor="white" stopOpacity={fadeReverse ? 0 : 1} />
+            <stop offset="70%" stopColor="white" stopOpacity={fadeReverse ? 0 : 1} />
+            <stop offset="100%" stopColor="white" stopOpacity={fadeReverse ? 1 : 0} />
           </>
         );
     }
@@ -544,18 +547,18 @@ export function DotPattern({
       {fade && (effect !== "none" || hover) && (
         <style jsx>{`
           canvas {
-            mask-image: radial-gradient(circle farthest-corner at 50% 50%, black 0%, black 70%, transparent 100%);
-            -webkit-mask-image: radial-gradient(circle farthest-corner at 50% 50%, black 0%, black 70%, transparent 100%);
+            mask-image: radial-gradient(circle farthest-corner at 50% 50%, ${fadeReverse ? 'transparent' : 'black'} 0%, ${fadeReverse ? 'transparent' : 'black'} 70%, ${fadeReverse ? 'black' : 'transparent'} 100%);
+            -webkit-mask-image: radial-gradient(circle farthest-corner at 50% 50%, ${fadeReverse ? 'transparent' : 'black'} 0%, ${fadeReverse ? 'transparent' : 'black'} 70%, ${fadeReverse ? 'black' : 'transparent'} 100%);
           }
           ${fadeLevel === 'medium' ? `
           canvas {
-            mask-image: radial-gradient(circle farthest-side at 50% 50%, black 0%, black 50%, transparent 100%);
-            -webkit-mask-image: radial-gradient(circle farthest-side at 50% 50%, black 0%, black 50%, transparent 100%);
+            mask-image: radial-gradient(circle farthest-side at 50% 50%, ${fadeReverse ? 'transparent' : 'black'} 0%, ${fadeReverse ? 'transparent' : 'black'} 50%, ${fadeReverse ? 'black' : 'transparent'} 100%);
+            -webkit-mask-image: radial-gradient(circle farthest-side at 50% 50%, ${fadeReverse ? 'transparent' : 'black'} 0%, ${fadeReverse ? 'transparent' : 'black'} 50%, ${fadeReverse ? 'black' : 'transparent'} 100%);
           }` : ''}
           ${fadeLevel === 'strong' ? `
           canvas {
-            mask-image: radial-gradient(circle closest-side at 50% 50%, black 0%, black 30%, transparent 100%);
-            -webkit-mask-image: radial-gradient(circle closest-side at 50% 50%, black 0%, black 30%, transparent 100%);
+            mask-image: radial-gradient(circle closest-side at 50% 50%, ${fadeReverse ? 'transparent' : 'black'} 0%, ${fadeReverse ? 'transparent' : 'black'} 30%, ${fadeReverse ? 'black' : 'transparent'} 100%);
+            -webkit-mask-image: radial-gradient(circle closest-side at 50% 50%, ${fadeReverse ? 'transparent' : 'black'} 0%, ${fadeReverse ? 'transparent' : 'black'} 30%, ${fadeReverse ? 'black' : 'transparent'} 100%);
           }` : ''}
         `}</style>
       )}

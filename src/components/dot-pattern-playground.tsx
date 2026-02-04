@@ -112,6 +112,7 @@ export function DotPatternPlayground({
         opacity={params.opacity}
         fade={params.fade}
         fadeLevel={params.fadeLevel}
+        fadeReverse={params.fadeReverse}
         effect={params.effect}
         effectPlaying={params.effectPlaying}
         effectMaxScale={params.effectMaxScale}

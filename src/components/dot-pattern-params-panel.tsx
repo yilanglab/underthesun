@@ -219,6 +219,7 @@ export type DotPatternParams = {
   opacity: number;
   fade: boolean;
   fadeLevel: "weak" | "medium" | "strong";
+  fadeReverse: boolean;
   
   // Animation - Effects
   effect: "none" | "glow" | "scan" | "pulse";
@@ -259,6 +260,7 @@ export const DEFAULT_PARAMS: DotPatternParams = {
   opacity: 0.05,
   fade: false,
   fadeLevel: "weak",
+  fadeReverse: false,
   
   effect: "none",
   effectPlaying: false,
@@ -407,6 +409,7 @@ export function DotPatternParamsPanel({
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
+                          className="space-y-3"
                         >
                           <ButtonGroup
                             label=""
@@ -418,6 +421,15 @@ export function DotPatternParamsPanel({
                             ]}
                             onChange={(val) => onParamChange("fadeLevel", val)}
                           />
+                          <div className="flex items-center justify-between">
+                             <span className="text-xs font-medium text-muted-foreground">Invert Mask</span>
+                             <input
+                                type="checkbox"
+                                checked={params.fadeReverse}
+                                onChange={(e) => onParamChange("fadeReverse", e.target.checked)}
+                                className="h-4 w-4 rounded border-input bg-background text-primary focus:ring-offset-background"
+                              />
+                          </div>
                         </motion.div>
                       )}
                     </div>
