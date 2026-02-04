@@ -1,6 +1,64 @@
+"use client";
+
+import { useState } from "react";
+import { Settings2 } from "lucide-react";
+
 import { DotPattern } from "@/registry/ui/dot-pattern";
+import {
+  DotPatternParams,
+  DotPatternParamsPanel,
+} from "@/components/dot-pattern-params-panel";
+import { Button } from "@/components/ui/button";
+
+const INITIAL_PARAMS: DotPatternParams = {
+  width: 16,
+  height: 16,
+  x: 0,
+  y: 0,
+  cx: 1,
+  cy: 1,
+  cr: 1.5,
+  shape: "circle",
+  strokeWidth: 1,
+  mode: "orthogonal",
+  color: "#00142e",
+  opacity: 0.05,
+  fade: true,
+  fadeLevel: "strong",
+  fadeReverse: false,
+  effect: "glow",
+  effectPlaying: true,
+  effectEase: "linear",
+  effectMaxScale: 1,
+  effectMaxOpacity: 0.5,
+  effectColor: "#000000",
+  effectSize: 150,
+  effectDuration: 2.3,
+  multiColor: true,
+  multiColors: [
+    { color: "#ffa200", percent: 10 },
+    { color: "#29adff", percent: 40 },
+    { color: "#2478ff", percent: 50 },
+  ],
+  hover: true,
+  hoverRadius: 120,
+  hoverTargetScale: 1.8,
+  hoverTargetOpacity: 0.8,
+  hoverColor: "#000000",
+  hoverTrail: true,
+  hoverTrailDuration: 2,
+};
 
 export default function DotPatternUiTestPage() {
+  const [params, setParams] = useState<DotPatternParams>(INITIAL_PARAMS);
+  const [isPanelOpen, setIsPanelOpen] = useState(true);
+
+  const handleParamChange = <K extends keyof DotPatternParams>(
+    key: K,
+    value: DotPatternParams[K]
+  ) => {
+    setParams((prev) => ({ ...prev, [key]: value }));
+  };
   return (
     <div
       className="min-h-screen"
@@ -29,32 +87,56 @@ export default function DotPatternUiTestPage() {
 
         <div className="relative mx-auto mt-0 flex w-full max-w-[1880px] flex-col justify-center overflow-hidden rounded-[20px] bg-white px-20 py-10 min-h-[calc(100vh-60px-20px)] mb-5">
           <DotPattern
-            width={16}
-            height={16}
-            x={0}
-            y={0}
-            cx={1}
-            cy={1}
-            cr={1.5}
-            shape="circle"
-            mode="orthogonal"
-            color="#00142e"
-            opacity={0.05}
-            fade={true}
-            fadeLevel="strong"
-            effect="glow"
-            effectPlaying={true}
-            effectMaxScale={1}
-            effectMaxOpacity={0.5}
-            effectColor="#000000"
-            effectDuration={2.3}
-            multiColor={true}
-            multiColors={[{"color":"#ffa200","percent":10},{"color":"#29adff","percent":40},{"color":"#2478ff","percent":50}]}
-            hover={true}
-            hoverColor="#000000"
-            hoverTrail={true}
-            hoverTrailDuration={2}
+            width={params.width}
+            height={params.height}
+            x={params.x}
+            y={params.y}
+            cx={params.cx}
+            cy={params.cy}
+            cr={params.cr}
+            shape={params.shape}
+            strokeWidth={params.strokeWidth}
+            mode={params.mode}
+            color={params.color}
+            opacity={params.opacity}
+            fade={params.fade}
+            fadeLevel={params.fadeLevel}
+            fadeReverse={params.fadeReverse}
+            effect={params.effect}
+            effectPlaying={params.effectPlaying}
+            effectEase={params.effectEase}
+            effectMaxScale={params.effectMaxScale}
+            effectMaxOpacity={params.effectMaxOpacity}
+            effectColor={params.effectColor}
+            effectSize={params.effectSize}
+            effectDuration={params.effectDuration}
+            multiColor={params.multiColor}
+            multiColors={params.multiColors}
+            hover={params.hover}
+            hoverRadius={params.hoverRadius}
+            hoverTargetScale={params.hoverTargetScale}
+            hoverTargetOpacity={params.hoverTargetOpacity}
+            hoverColor={params.hoverColor}
+            hoverTrail={params.hoverTrail}
+            hoverTrailDuration={params.hoverTrailDuration}
           />
+          <DotPatternParamsPanel
+            isOpen={isPanelOpen}
+            params={params}
+            onParamChange={handleParamChange}
+            onReset={() => setParams(INITIAL_PARAMS)}
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`fixed bottom-6 right-6 z-50 h-10 w-10 rounded-full border bg-background/80 shadow-md backdrop-blur-sm hover:bg-background ${
+              isPanelOpen ? "bg-muted text-foreground" : ""
+            }`}
+            onClick={() => setIsPanelOpen((prev) => !prev)}
+            aria-label="Toggle parameters"
+          >
+            <Settings2 className="h-4 w-4" />
+          </Button>
           <div className="relative z-10 mx-auto flex w-full max-w-[888px] flex-col items-center gap-12">
             <div className="flex items-center gap-4">
               <img

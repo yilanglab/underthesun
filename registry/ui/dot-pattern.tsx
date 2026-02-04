@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useEffect, useState } from "react";
+import { useId, useRef, useEffect } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -381,32 +381,53 @@ export function DotPattern({
     multiColor, multiColors, fade, fadeLevel, fadeReverse
   ]);
 
-  // Update mouse position and calculate speed
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!hover || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    const now = performance.now();
-    const dt = now - lastMouseTime.current;
-    
-    if (dt > 0) {
-      const dx = x - lastMousePos.current.x;
-      const dy = y - lastMousePos.current.y;
-      const dist = Math.hypot(dx, dy);
-      // Speed in px/s
-      mouseSpeed.current = (dist / dt) * 1000;
+  useEffect(() => {
+    if (!hover) {
+      mousePosRef.current = { x: -9999, y: -9999 };
+      return;
     }
 
-    lastMousePos.current = { x, y };
-    lastMouseTime.current = now;
-    mousePosRef.current = { x, y };
-  };
+    const handleMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const inside =
+        x >= 0 && y >= 0 && x <= rect.width && y <= rect.height;
 
-  const handleMouseLeave = () => {
-    mousePosRef.current = { x: -9999, y: -9999 };
-  };
+      if (!inside) {
+        mousePosRef.current = { x: -9999, y: -9999 };
+        return;
+      }
+
+      const now = performance.now();
+      const dt = now - lastMouseTime.current;
+
+      if (dt > 0) {
+        const dx = x - lastMousePos.current.x;
+        const dy = y - lastMousePos.current.y;
+        const dist = Math.hypot(dx, dy);
+        // Speed in px/s
+        mouseSpeed.current = (dist / dt) * 1000;
+      }
+
+      lastMousePos.current = { x, y };
+      lastMouseTime.current = now;
+      mousePosRef.current = { x, y };
+    };
+
+    const handleBlur = () => {
+      mousePosRef.current = { x: -9999, y: -9999 };
+    };
+
+    window.addEventListener("mousemove", handleMove, { passive: true });
+    window.addEventListener("blur", handleBlur);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("blur", handleBlur);
+    };
+  }, [hover]);
 
   const getGradientStops = () => {
     switch (fadeLevel) {
@@ -495,8 +516,6 @@ export function DotPattern({
     <div 
       ref={containerRef}
       className={cn("absolute inset-0 h-full w-full", className)}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
       {...props}
     >
       <svg
