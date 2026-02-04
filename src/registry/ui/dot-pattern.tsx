@@ -285,13 +285,6 @@ export function DotPattern({
           }
 
           // Combine intensities
-          // We have effectIntensity (0-1) and hoverIntensity (0-1)
-          // We render TWO passes if needed, or combine them?
-          // Combining colors is tricky in one pass.
-          // Let's adopt a "max" strategy for scale/opacity, but draw twice if colors differ?
-          // Or just blend.
-          // Let's keep it simple: Determine final scale/color/opacity based on dominant effect.
-          
           if (effectIntensity > 0.01 || hoverIntensity > 0.01) {
              // Calculate properties for Effect
              const effectScale = 1 + effectIntensity * (effectMaxScale - 1);
@@ -305,10 +298,34 @@ export function DotPattern({
              const currentScale = Math.max(effectScale, hoverScale);
              const currentAlpha = Math.max(effectOpacity, hoverOpacity);
              
-             // Color blending? 
-             // If hover is stronger, use hover color.
-             const useHoverColor = hoverIntensity > effectIntensity;
-             ctx.fillStyle = useHoverColor ? activeHoverColor : activeEffectColor;
+             // Color blending
+             let finalColor = activeEffectColor;
+
+             if (multiColor && multiColors && multiColors.length > 0) {
+                // Multi-Color Mode: Active dots get random color
+                // This applies to both Effect and Hover animations
+                const dotIndex = i * cols + j;
+                const seed = (dotIndex * 137.5) % 1; 
+                let cumulative = 0;
+                for (const item of multiColors) {
+                   cumulative += item.percent;
+                   if (seed * 100 < cumulative) {
+                      finalColor = item.color;
+                      break;
+                   }
+                }
+             } else {
+                 // Single Color Mode
+                 // Priority: Hover > Effect
+                 // If hover is active (above threshold), prioritize hover color
+                 if (hoverIntensity > 0.05) {
+                    finalColor = activeHoverColor;
+                 } else {
+                    finalColor = activeEffectColor;
+                 }
+             }
+
+             ctx.fillStyle = finalColor;
              
              // Apply alpha
              ctx.globalAlpha = currentAlpha;
@@ -357,6 +374,7 @@ export function DotPattern({
     width, height, x, y, cx, cy, cr, shape, strokeWidth, mode, color, opacity, 
     effect, effectPlaying, effectEase, effectMaxScale, effectMaxOpacity, effectSize, effectDuration, activeEffectColor,
     hover, hoverRadius, hoverTargetScale, hoverTargetOpacity, activeHoverColor, hoverTrail, hoverTrailDuration,
+    multiColor, multiColors,
     mousePos
   ]);
 
