@@ -19,7 +19,19 @@ type DotPatternProps = {
   fadeLevel?: "weak" | "medium" | "strong";
   effect?: "glow" | "scan" | "pulse" | "none";
   effectPlaying?: boolean;
+  effectMaxScale?: number;
+  effectMaxOpacity?: number;
+  effectColor?: string;
+  effectSize?: number;
+
   hover?: boolean;
+  hoverRadius?: number;
+  hoverTargetScale?: number;
+  hoverTargetOpacity?: number;
+  hoverColor?: string;
+  hoverTrail?: boolean;
+  hoverTrailDuration?: number;
+
   className?: string;
   [key: string]: unknown;
 };
@@ -41,7 +53,19 @@ export function DotPattern({
   fadeLevel = "weak",
   effect = "none",
   effectPlaying = false,
+  effectMaxScale = 1.8,
+  effectMaxOpacity = 0.8,
+  effectColor,
+  effectSize = 150,
+
   hover = false,
+  hoverRadius = 120,
+  hoverTargetScale = 1.8,
+  hoverTargetOpacity = 0.8,
+  hoverColor,
+  hoverTrail = false,
+  hoverTrailDuration = 1.0,
+
   className,
   ...props
 }: DotPatternProps) {
@@ -52,10 +76,17 @@ export function DotPattern({
   const size = cr * 2;
   const currentStrokeWidth = strokeWidth ?? 1;
 
-  // Canvas ref for effects
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [mousePos, setMousePos] = useState({ x: -9999, y: -9999 });
+  const trailGridRef = useRef<Float32Array | null>(null);
+  const lastMousePos = useRef({ x: -9999, y: -9999 });
+  const lastMouseTime = useRef(0);
+  const mouseSpeed = useRef(0);
+  
+  // Use passed effect colors or fallback to base color
+  const activeEffectColor = effectColor ?? color;
+  const activeHoverColor = hoverColor ?? color;
 
   useEffect(() => {
     // Only run canvas logic if effects are enabled or hover is on
@@ -75,12 +106,15 @@ export function DotPattern({
 
     let animationFrameId: number;
     let startTime = performance.now();
+    let lastTime = startTime;
 
     const render = (timestamp: number) => {
       if (!containerRef.current) return;
       
       const { width: containerWidth, height: containerHeight } = containerRef.current.getBoundingClientRect();
-      
+      const dt = (timestamp - lastTime) / 1000; // delta time in seconds
+      lastTime = timestamp;
+
       // Update canvas size if needed (handling DPI)
       const dpr = window.devicePixelRatio || 1;
       if (canvas.width !== containerWidth * dpr || canvas.height !== containerHeight * dpr) {
@@ -88,6 +122,8 @@ export function DotPattern({
         canvas.height = containerHeight * dpr;
         canvas.style.width = `${containerWidth}px`;
         canvas.style.height = `${containerHeight}px`;
+        // Reset trail grid on resize
+        trailGridRef.current = null;
       }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -97,20 +133,28 @@ export function DotPattern({
       // Pre-calculate common values
       const cols = Math.ceil(containerWidth / width);
       const rows = Math.ceil(containerHeight / height);
+      const totalDots = cols * rows;
+
+      // Initialize trail grid if needed
+      if (hoverTrail && (!trailGridRef.current || trailGridRef.current.length !== totalDots)) {
+        trailGridRef.current = new Float32Array(totalDots);
+      } else if (!hoverTrail) {
+        trailGridRef.current = null;
+      }
       
       // Time-based variables for effects
       const time = effectPlaying ? (timestamp - startTime) / 1000 : 0;
       
       // Scan effect variables
       const scanSpeed = 200; // px per second
-      const scanWidth = 150; // width of scan band
+      const scanWidth = effectSize; 
       const scanX = (time * scanSpeed) % (containerWidth + scanWidth * 2) - scanWidth;
 
       // Pulse effect variables
       const pulseSpeed = 100; // px per second
       const pulseMaxRadius = Math.max(containerWidth, containerHeight);
       const pulseRadius = (time * pulseSpeed) % pulseMaxRadius;
-      const pulseWidth = 200;
+      const pulseWidth = effectSize;
 
       // Draw dots
       for (let i = 0; i < rows; i++) {
@@ -161,29 +205,80 @@ export function DotPattern({
             }
           }
 
-          // Hover effect: Radius around mouse
+          // Hover effect
           if (hover) {
+            // Calculate distance to mouse
             const dist = Math.hypot(dotX - mousePos.x, dotY - mousePos.y);
-            const hoverRadius = 120;
+            let instantHover = 0;
+            
             if (dist < hoverRadius) {
-              hoverIntensity = Math.pow(1 - dist / hoverRadius, 2);
+               // Base hover intensity from distance
+               instantHover = Math.pow(1 - dist / hoverRadius, 2);
+            }
+
+            if (hoverTrail && trailGridRef.current) {
+              const dotIndex = i * cols + j;
+              // If trail is enabled, we use the grid to store/decay values
+              
+              // Decay existing value
+              // Linear decay: value - (dt / duration)
+              // Or exponential: value * Math.pow(fraction, dt)
+              // Let's use linear for predictable duration
+              let currentTrail = trailGridRef.current[dotIndex] || 0;
+              currentTrail = Math.max(0, currentTrail - dt / hoverTrailDuration);
+
+              // Add new input if mouse is close
+              // If we have a trail, the intensity is boosted by mouse speed? 
+              // User requirement: "intensity depends on mouse speed"
+              // Max speed assumption? Say 2000px/s = 1.0 intensity boost
+              if (dist < hoverRadius) {
+                 const speedFactor = Math.min(mouseSpeed.current / 1000, 1);
+                 // Only add if moving? "mouse static produces no effect"
+                 if (speedFactor > 0.01) {
+                    // Combine distance and speed
+                    const newIntensity = instantHover * speedFactor;
+                    // "Fast change, slow restore" -> Jump up quickly
+                    currentTrail = Math.max(currentTrail, newIntensity);
+                 }
+              }
+
+              trailGridRef.current[dotIndex] = currentTrail;
+              hoverIntensity = currentTrail;
+
+            } else {
+              // Standard hover
+              hoverIntensity = instantHover;
             }
           }
 
           // Combine intensities
-          // We only render the dot if there's some intensity (overlay approach)
-          // OR if we want to redraw base dots. 
-          // Strategy: The SVG pattern draws the base (faint) dots.
-          // Canvas draws the "active" state on top (brighter/larger/colored).
+          // We have effectIntensity (0-1) and hoverIntensity (0-1)
+          // We render TWO passes if needed, or combine them?
+          // Combining colors is tricky in one pass.
+          // Let's adopt a "max" strategy for scale/opacity, but draw twice if colors differ?
+          // Or just blend.
+          // Let's keep it simple: Determine final scale/color/opacity based on dominant effect.
           
-          const totalIntensity = Math.min(effectIntensity + hoverIntensity, 1);
-          
-          if (totalIntensity > 0.01) {
-            const currentScale = 1 + totalIntensity * 0.8; // Max 1.8x scale
-            const currentAlpha = opacity + (1 - opacity) * totalIntensity * 0.8; // Boost opacity significantly
-            
-            ctx.fillStyle = color;
-            ctx.globalAlpha = currentAlpha;
+          if (effectIntensity > 0.01 || hoverIntensity > 0.01) {
+             // Calculate properties for Effect
+             const effectScale = 1 + effectIntensity * (effectMaxScale - 1);
+             const effectOpacity = opacity + (effectMaxOpacity - opacity) * effectIntensity;
+             
+             // Calculate properties for Hover
+             const hoverScale = 1 + hoverIntensity * (hoverTargetScale - 1);
+             const hoverOpacity = opacity + (hoverTargetOpacity - opacity) * hoverIntensity;
+
+             // Combine: simple max for geometry
+             const currentScale = Math.max(effectScale, hoverScale);
+             const currentAlpha = Math.max(effectOpacity, hoverOpacity);
+             
+             // Color blending? 
+             // If hover is stronger, use hover color.
+             const useHoverColor = hoverIntensity > effectIntensity;
+             ctx.fillStyle = useHoverColor ? activeHoverColor : activeEffectColor;
+             
+             // Apply alpha
+             ctx.globalAlpha = currentAlpha;
             
             // Draw shape
             if (shape === "square") {
@@ -191,7 +286,7 @@ export function DotPattern({
               ctx.fillRect(dotX - s/2, dotY - s/2, s, s);
             } else if (shape === "cross") {
               const s = size * currentScale;
-              const w = currentStrokeWidth * currentScale; // Scale stroke too? Maybe just size. Let's scale stroke slightly
+              const w = currentStrokeWidth * currentScale; 
               
               ctx.beginPath();
               // Vertical
@@ -225,16 +320,34 @@ export function DotPattern({
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [width, height, x, y, cx, cy, cr, shape, strokeWidth, mode, color, opacity, effect, effectPlaying, hover, mousePos]);
+  }, [
+    width, height, x, y, cx, cy, cr, shape, strokeWidth, mode, color, opacity, 
+    effect, effectPlaying, effectMaxScale, effectMaxOpacity, effectSize, activeEffectColor,
+    hover, hoverRadius, hoverTargetScale, hoverTargetOpacity, activeHoverColor, hoverTrail, hoverTrailDuration,
+    mousePos
+  ]);
 
-  // Update mouse position
+  // Update mouse position and calculate speed
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!hover || !containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    setMousePos({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    });
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const now = performance.now();
+    const dt = now - lastMouseTime.current;
+    
+    if (dt > 0) {
+      const dx = x - lastMousePos.current.x;
+      const dy = y - lastMousePos.current.y;
+      const dist = Math.hypot(dx, dy);
+      // Speed in px/s
+      mouseSpeed.current = (dist / dt) * 1000;
+    }
+
+    lastMousePos.current = { x, y };
+    lastMouseTime.current = now;
+    setMousePos({ x, y });
   };
 
   const handleMouseLeave = () => {

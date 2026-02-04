@@ -114,9 +114,19 @@ export function DotPatternPlayground({
         fadeLevel={params.fadeLevel}
         effect={params.effect}
         effectPlaying={params.effectPlaying}
+        effectMaxScale={params.effectMaxScale}
+        effectMaxOpacity={params.effectMaxOpacity}
+        effectColor={params.effectColor}
+        effectSize={params.effectSize}
         hover={params.hover}
+        hoverRadius={params.hoverRadius}
+        hoverTargetScale={params.hoverTargetScale}
+        hoverTargetOpacity={params.hoverTargetOpacity}
+        hoverColor={params.hoverColor}
+        hoverTrail={params.hoverTrail}
+        hoverTrailDuration={params.hoverTrailDuration}
       />
-      <div className="relative z-10 flex h-full items-center justify-center">
+      <div className="pointer-events-none relative z-10 flex h-full items-center justify-center">
         <div className="rounded-md border bg-background px-4 py-2 text-sm shadow-sm">
           DotPattern Playground
         </div>

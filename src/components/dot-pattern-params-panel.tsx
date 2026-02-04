@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 type SliderRowProps = {
@@ -218,9 +219,23 @@ export type DotPatternParams = {
   opacity: number;
   fade: boolean;
   fadeLevel: "weak" | "medium" | "strong";
+  
+  // Animation - Effects
   effect: "none" | "glow" | "scan" | "pulse";
   effectPlaying: boolean;
+  effectMaxScale: number;
+  effectMaxOpacity: number;
+  effectColor: string;
+  effectSize: number; // for Scan/Pulse width
+
+  // Animation - Hover
   hover: boolean;
+  hoverRadius: number;
+  hoverTargetScale: number;
+  hoverTargetOpacity: number;
+  hoverColor: string;
+  hoverTrail: boolean;
+  hoverTrailDuration: number;
 };
 
 export const DEFAULT_PARAMS: DotPatternParams = {
@@ -238,9 +253,21 @@ export const DEFAULT_PARAMS: DotPatternParams = {
   opacity: 0.05,
   fade: false,
   fadeLevel: "weak",
+  
   effect: "none",
   effectPlaying: false,
+  effectMaxScale: 1.8,
+  effectMaxOpacity: 0.8,
+  effectColor: "#000000", // Default to match base color, will be updated if base color changes? No, independent.
+  effectSize: 150, // default scan/pulse width
+
   hover: false,
+  hoverRadius: 120,
+  hoverTargetScale: 1.8,
+  hoverTargetOpacity: 0.8,
+  hoverColor: "#000000",
+  hoverTrail: false,
+  hoverTrailDuration: 1.0,
 };
 
 type DotPatternParamsPanelProps = {
@@ -315,224 +342,393 @@ export function DotPatternParamsPanel({
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-5 scrollbar-hide">
-            <div className="grid gap-8">
-              {/* Appearance Section */}
-              <div className="space-y-5">
-                <ButtonGroup
-                  label="Shape"
-                  value={params.shape}
-                  options={[
-                    { label: "Circle", value: "circle" },
-                    { label: "Square", value: "square" },
-                    { label: "Cross", value: "cross" },
-                  ]}
-                  onChange={(val) => onParamChange("shape", val)}
-                />
+          <div className="flex-1 overflow-y-auto scrollbar-hide">
+            <Tabs defaultValue="basic" className="h-full flex flex-col">
+              <div className="px-5 pt-4">
+                <TabsList className="w-full grid grid-cols-2">
+                  <TabsTrigger value="basic">Basic</TabsTrigger>
+                  <TabsTrigger value="animation">Animation</TabsTrigger>
+                </TabsList>
+              </div>
 
-                <ButtonGroup
-                  label="Mode"
-                  value={params.mode}
-                  options={[
-                    { label: "Orthogonal", value: "orthogonal" },
-                    { label: "Staggered", value: "staggered" },
-                  ]}
-                  onChange={(val) => onParamChange("mode", val)}
-                />
+              <div className="flex-1 overflow-y-auto p-5 scrollbar-hide">
+                <TabsContent value="basic" className="m-0 space-y-8">
+                  {/* Appearance Section */}
+                  <div className="space-y-5">
+                    <ButtonGroup
+                      label="Shape"
+                      value={params.shape}
+                      options={[
+                        { label: "Circle", value: "circle" },
+                        { label: "Square", value: "square" },
+                        { label: "Cross", value: "cross" },
+                      ]}
+                      onChange={(val) => onParamChange("shape", val)}
+                    />
 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-muted-foreground">
-                      Fade Edges
-                    </span>
-                    <input
-                      type="checkbox"
-                      checked={params.fade}
-                      onChange={(e) => onParamChange("fade", e.target.checked)}
-                      className="h-4 w-4 rounded border-input bg-background text-primary focus:ring-offset-background"
+                    <ButtonGroup
+                      label="Mode"
+                      value={params.mode}
+                      options={[
+                        { label: "Orthogonal", value: "orthogonal" },
+                        { label: "Staggered", value: "staggered" },
+                      ]}
+                      onChange={(val) => onParamChange("mode", val)}
+                    />
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-muted-foreground">
+                          Fade Edges
+                        </span>
+                        <input
+                          type="checkbox"
+                          checked={params.fade}
+                          onChange={(e) => onParamChange("fade", e.target.checked)}
+                          className="h-4 w-4 rounded border-input bg-background text-primary focus:ring-offset-background"
+                        />
+                      </div>
+                      {params.fade && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                        >
+                          <ButtonGroup
+                            label=""
+                            value={params.fadeLevel}
+                            options={[
+                              { label: "Weak", value: "weak" },
+                              { label: "Medium", value: "medium" },
+                              { label: "Strong", value: "strong" },
+                            ]}
+                            onChange={(val) => onParamChange("fadeLevel", val)}
+                          />
+                        </motion.div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-border/50" />
+
+                  {/* Style Section */}
+                  <div className="space-y-5">
+                    <div className="space-y-2">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        Color
+                      </span>
+                      <div className="flex gap-2">
+                        <div className="relative h-8 w-8 rounded-md border overflow-hidden shrink-0">
+                          <input
+                            type="color"
+                            className="absolute inset-0 h-full w-full opacity-0 cursor-pointer"
+                            value={params.color}
+                            onChange={(e) => onParamChange("color", e.target.value)}
+                          />
+                          <div
+                            className="h-full w-full"
+                            style={{ backgroundColor: params.color }}
+                          />
+                        </div>
+                        <input
+                          type="text"
+                          className="flex-1 h-8 rounded-md border bg-background px-3 text-xs uppercase font-mono"
+                          value={params.color}
+                          onChange={(e) => onParamChange("color", e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <SliderRow
+                      label="Opacity"
+                      value={params.opacity}
+                      min={0}
+                      max={1}
+                      step={0.01}
+                      onChange={(val) => onParamChange("opacity", val)}
                     />
                   </div>
-                  {params.fade && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                    >
+
+                  <div className="h-px bg-border/50" />
+
+                  {/* Dimensions Section */}
+                  <div className="space-y-6">
+                    <LinkedSliderRow
+                      label1="Width"
+                      value1={params.width}
+                      label2="Height"
+                      value2={params.height}
+                      min={4}
+                      max={100}
+                      step={1}
+                      onChange1={(val) => onParamChange("width", val)}
+                      onChange2={(val) => onParamChange("height", val)}
+                    />
+
+                    <LinkedSliderRow
+                      label1="CX"
+                      value1={params.cx}
+                      label2="CY"
+                      value2={params.cy}
+                      min={0}
+                      max={Math.max(maxCx, maxCy)}
+                      max1={maxCx}
+                      max2={maxCy}
+                      step={0.5}
+                      onChange1={(val) => onParamChange("cx", val)}
+                      onChange2={(val) => onParamChange("cy", val)}
+                    />
+
+                    <SliderRow
+                      label={params.shape === "circle" ? "Radius" : "Size"}
+                      value={params.cr}
+                      min={0.5}
+                      max={10}
+                      step={0.5}
+                      onChange={(val) => onParamChange("cr", val)}
+                    />
+
+                    {params.shape === "cross" && (
+                      <SliderRow
+                        label="Stroke Width"
+                        value={params.strokeWidth}
+                        min={0.5}
+                        max={5}
+                        step={0.5}
+                        onChange={(val) => onParamChange("strokeWidth", val)}
+                      />
+                    )}
+
+                    <LinkedSliderRow
+                      label1="X Offset"
+                      value1={params.x}
+                      label2="Y Offset"
+                      value2={params.y}
+                      min={-50}
+                      max={50}
+                      step={1}
+                      onChange1={(val) => onParamChange("x", val)}
+                      onChange2={(val) => onParamChange("y", val)}
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="animation" className="m-0 space-y-8">
+                  {/* Effects Section */}
+                  <div className="space-y-5">
+                    <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Global Effects
+                    </h4>
+                    
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-muted-foreground">Effect Type</span>
+                        {params.effect !== "none" && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => onParamChange("effectPlaying", !params.effectPlaying)}
+                            title={params.effectPlaying ? "Pause" : "Play"}
+                          >
+                            {params.effectPlaying ? (
+                              <Pause className="h-3 w-3 fill-current" />
+                            ) : (
+                              <Play className="h-3 w-3 fill-current" />
+                            )}
+                          </Button>
+                        )}
+                      </div>
                       <ButtonGroup
                         label=""
-                        value={params.fadeLevel}
+                        value={params.effect}
                         options={[
-                          { label: "Weak", value: "weak" },
-                          { label: "Medium", value: "medium" },
-                          { label: "Strong", value: "strong" },
+                          { label: "None", value: "none" },
+                          { label: "Glow", value: "glow" },
+                          { label: "Scan", value: "scan" },
+                          { label: "Pulse", value: "pulse" },
                         ]}
-                        onChange={(val) => onParamChange("fadeLevel", val)}
-                      />
-                    </motion.div>
-                  )}
-                </div>
-              </div>
-
-              <div className="h-px bg-border/50" />
-
-              {/* Style Section */}
-              <div className="space-y-5">
-                <div className="space-y-2">
-                  <span className="text-xs font-medium text-muted-foreground">
-                    Color
-                  </span>
-                  <div className="flex gap-2">
-                    <div className="relative h-8 w-8 rounded-md border overflow-hidden shrink-0">
-                      <input
-                        type="color"
-                        className="absolute inset-0 h-full w-full opacity-0 cursor-pointer"
-                        value={params.color}
-                        onChange={(e) => onParamChange("color", e.target.value)}
-                      />
-                      <div
-                        className="h-full w-full"
-                        style={{ backgroundColor: params.color }}
+                        onChange={(val) => {
+                          onParamChange("effect", val);
+                          // Auto-play when selecting an effect
+                          if (val !== "none") {
+                            onParamChange("effectPlaying", true);
+                          }
+                        }}
                       />
                     </div>
-                    <input
-                      type="text"
-                      className="flex-1 h-8 rounded-md border bg-background px-3 text-xs uppercase font-mono"
-                      value={params.color}
-                      onChange={(e) => onParamChange("color", e.target.value)}
-                    />
-                  </div>
-                </div>
 
-                <SliderRow
-                  label="Opacity"
-                  value={params.opacity}
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  onChange={(val) => onParamChange("opacity", val)}
-                />
-              </div>
-
-              <div className="h-px bg-border/50" />
-
-              {/* Dimensions Section */}
-              <div className="space-y-6">
-                <LinkedSliderRow
-                  label1="Width"
-                  value1={params.width}
-                  label2="Height"
-                  value2={params.height}
-                  min={4}
-                  max={100}
-                  step={1}
-                  onChange1={(val) => onParamChange("width", val)}
-                  onChange2={(val) => onParamChange("height", val)}
-                />
-
-                <LinkedSliderRow
-                  label1="CX"
-                  value1={params.cx}
-                  label2="CY"
-                  value2={params.cy}
-                  min={0}
-                  max={Math.max(maxCx, maxCy)}
-                  max1={maxCx}
-                  max2={maxCy}
-                  step={0.5}
-                  onChange1={(val) => onParamChange("cx", val)}
-                  onChange2={(val) => onParamChange("cy", val)}
-                />
-
-                <SliderRow
-                  label={params.shape === "circle" ? "Radius" : "Size"}
-                  value={params.cr}
-                  min={0.5}
-                  max={10}
-                  step={0.5}
-                  onChange={(val) => onParamChange("cr", val)}
-                />
-
-                {params.shape === "cross" && (
-                  <SliderRow
-                    label="Stroke Width"
-                    value={params.strokeWidth}
-                    min={0.5}
-                    max={5}
-                    step={0.5}
-                    onChange={(val) => onParamChange("strokeWidth", val)}
-                  />
-                )}
-
-                <LinkedSliderRow
-                  label1="X Offset"
-                  value1={params.x}
-                  label2="Y Offset"
-                  value2={params.y}
-                  min={-50}
-                  max={50}
-                  step={1}
-                  onChange1={(val) => onParamChange("x", val)}
-                  onChange2={(val) => onParamChange("y", val)}
-                />
-              </div>
-
-              <div className="h-px bg-border/50" />
-
-              {/* Effects Section */}
-              <div className="space-y-5">
-                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Effects
-                </h4>
-                
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-muted-foreground">Effect Type</span>
                     {params.effect !== "none" && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => onParamChange("effectPlaying", !params.effectPlaying)}
-                        title={params.effectPlaying ? "Pause" : "Play"}
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="space-y-5 pt-2"
                       >
-                        {params.effectPlaying ? (
-                          <Pause className="h-3 w-3 fill-current" />
-                        ) : (
-                          <Play className="h-3 w-3 fill-current" />
-                        )}
-                      </Button>
+                         <div className="space-y-2">
+                          <span className="text-xs font-medium text-muted-foreground">
+                            Effect Color
+                          </span>
+                          <div className="flex gap-2">
+                            <div className="relative h-8 w-8 rounded-md border overflow-hidden shrink-0">
+                              <input
+                                type="color"
+                                className="absolute inset-0 h-full w-full opacity-0 cursor-pointer"
+                                value={params.effectColor}
+                                onChange={(e) => onParamChange("effectColor", e.target.value)}
+                              />
+                              <div
+                                className="h-full w-full"
+                                style={{ backgroundColor: params.effectColor }}
+                              />
+                            </div>
+                            <input
+                              type="text"
+                              className="flex-1 h-8 rounded-md border bg-background px-3 text-xs uppercase font-mono"
+                              value={params.effectColor}
+                              onChange={(e) => onParamChange("effectColor", e.target.value)}
+                            />
+                          </div>
+                        </div>
+
+                        <SliderRow
+                          label="Max Opacity"
+                          value={params.effectMaxOpacity}
+                          min={0}
+                          max={1}
+                          step={0.05}
+                          onChange={(val) => onParamChange("effectMaxOpacity", val)}
+                        />
+                         <SliderRow
+                          label="Max Scale"
+                          value={params.effectMaxScale}
+                          min={1}
+                          max={3}
+                          step={0.1}
+                          onChange={(val) => onParamChange("effectMaxScale", val)}
+                        />
+                         {(params.effect === "scan" || params.effect === "pulse") && (
+                            <SliderRow
+                            label="Effect Size"
+                            value={params.effectSize}
+                            min={20}
+                            max={500}
+                            step={10}
+                            onChange={(val) => onParamChange("effectSize", val)}
+                          />
+                         )}
+                      </motion.div>
                     )}
                   </div>
-                  <ButtonGroup
-                    label=""
-                    value={params.effect}
-                    options={[
-                      { label: "None", value: "none" },
-                      { label: "Glow", value: "glow" },
-                      { label: "Scan", value: "scan" },
-                      { label: "Pulse", value: "pulse" },
-                    ]}
-                    onChange={(val) => {
-                      onParamChange("effect", val);
-                      // Auto-play when selecting an effect
-                      if (val !== "none") {
-                        onParamChange("effectPlaying", true);
-                      }
-                    }}
-                  />
-                </div>
 
-                <div className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
-                  <span className="text-muted-foreground">Interactive Hover</span>
-                  <input
-                    type="checkbox"
-                    checked={params.hover}
-                    onChange={(e) => onParamChange("hover", e.target.checked)}
-                    className="h-4 w-4 rounded border-input bg-background text-primary focus:ring-offset-background"
-                  />
-                </div>
+                  <div className="h-px bg-border/50" />
+
+                  {/* Hover Section */}
+                  <div className="space-y-5">
+                     <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Interactive Hover
+                    </h4>
+
+                    <div className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
+                      <span className="text-muted-foreground">Enable Hover</span>
+                      <input
+                        type="checkbox"
+                        checked={params.hover}
+                        onChange={(e) => onParamChange("hover", e.target.checked)}
+                        className="h-4 w-4 rounded border-input bg-background text-primary focus:ring-offset-background"
+                      />
+                    </div>
+
+                     {params.hover && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="space-y-5 pt-2"
+                      >
+                         <div className="space-y-2">
+                          <span className="text-xs font-medium text-muted-foreground">
+                            Hover Color
+                          </span>
+                          <div className="flex gap-2">
+                            <div className="relative h-8 w-8 rounded-md border overflow-hidden shrink-0">
+                              <input
+                                type="color"
+                                className="absolute inset-0 h-full w-full opacity-0 cursor-pointer"
+                                value={params.hoverColor}
+                                onChange={(e) => onParamChange("hoverColor", e.target.value)}
+                              />
+                              <div
+                                className="h-full w-full"
+                                style={{ backgroundColor: params.hoverColor }}
+                              />
+                            </div>
+                            <input
+                              type="text"
+                              className="flex-1 h-8 rounded-md border bg-background px-3 text-xs uppercase font-mono"
+                              value={params.hoverColor}
+                              onChange={(e) => onParamChange("hoverColor", e.target.value)}
+                            />
+                          </div>
+                        </div>
+
+                         <SliderRow
+                          label="Radius"
+                          value={params.hoverRadius}
+                          min={20}
+                          max={300}
+                          step={10}
+                          onChange={(val) => onParamChange("hoverRadius", val)}
+                        />
+                        <SliderRow
+                          label="Target Opacity"
+                          value={params.hoverTargetOpacity}
+                          min={0}
+                          max={1}
+                          step={0.05}
+                          onChange={(val) => onParamChange("hoverTargetOpacity", val)}
+                        />
+                         <SliderRow
+                          label="Target Scale"
+                          value={params.hoverTargetScale}
+                          min={1}
+                          max={3}
+                          step={0.1}
+                          onChange={(val) => onParamChange("hoverTargetScale", val)}
+                        />
+
+                         <div className="h-px bg-border/50 my-4" />
+
+                         <div className="space-y-3">
+                           <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium text-muted-foreground">
+                              Motion Trail
+                            </span>
+                            <input
+                              type="checkbox"
+                              checked={params.hoverTrail}
+                              onChange={(e) => onParamChange("hoverTrail", e.target.checked)}
+                              className="h-4 w-4 rounded border-input bg-background text-primary focus:ring-offset-background"
+                            />
+                          </div>
+                           {params.hoverTrail && (
+                             <SliderRow
+                              label="Trail Duration"
+                              value={params.hoverTrailDuration}
+                              min={0.1}
+                              max={5}
+                              step={0.1}
+                              onChange={(val) => onParamChange("hoverTrailDuration", val)}
+                            />
+                           )}
+                         </div>
+
+                      </motion.div>
+                    )}
+                  </div>
+                </TabsContent>
               </div>
-            </div>
+            </Tabs>
           </div>
         </motion.div>
       )}

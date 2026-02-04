@@ -214,6 +214,66 @@ export function DotPatternClient({
                       <td className="px-4 py-2">是否启用鼠标交互效果</td>
                     </tr>
                     <tr className="border-t">
+                      <td className="px-4 py-2">hoverRadius</td>
+                      <td className="px-4 py-2">number</td>
+                      <td className="px-4 py-2">120</td>
+                      <td className="px-4 py-2">鼠标交互影响半径</td>
+                    </tr>
+                     <tr className="border-t">
+                      <td className="px-4 py-2">hoverTargetScale</td>
+                      <td className="px-4 py-2">number</td>
+                      <td className="px-4 py-2">1.8</td>
+                      <td className="px-4 py-2">鼠标悬停时的最大缩放比例</td>
+                    </tr>
+                     <tr className="border-t">
+                      <td className="px-4 py-2">hoverTargetOpacity</td>
+                      <td className="px-4 py-2">number</td>
+                      <td className="px-4 py-2">0.8</td>
+                      <td className="px-4 py-2">鼠标悬停时的最大不透明度</td>
+                    </tr>
+                     <tr className="border-t">
+                      <td className="px-4 py-2">hoverColor</td>
+                      <td className="px-4 py-2">string</td>
+                      <td className="px-4 py-2">-</td>
+                      <td className="px-4 py-2">鼠标悬停时的颜色 (默认同基础颜色)</td>
+                    </tr>
+                     <tr className="border-t">
+                      <td className="px-4 py-2">hoverTrail</td>
+                      <td className="px-4 py-2">boolean</td>
+                      <td className="px-4 py-2">false</td>
+                      <td className="px-4 py-2">是否启用鼠标拖尾效果 (强度随速度变化)</td>
+                    </tr>
+                     <tr className="border-t">
+                      <td className="px-4 py-2">hoverTrailDuration</td>
+                      <td className="px-4 py-2">number</td>
+                      <td className="px-4 py-2">1.0</td>
+                      <td className="px-4 py-2">拖尾效果还原持续时间 (秒)</td>
+                    </tr>
+                     <tr className="border-t">
+                      <td className="px-4 py-2">effectMaxScale</td>
+                      <td className="px-4 py-2">number</td>
+                      <td className="px-4 py-2">1.8</td>
+                      <td className="px-4 py-2">动效时的最大缩放比例</td>
+                    </tr>
+                     <tr className="border-t">
+                      <td className="px-4 py-2">effectMaxOpacity</td>
+                      <td className="px-4 py-2">number</td>
+                      <td className="px-4 py-2">0.8</td>
+                      <td className="px-4 py-2">动效时的最大不透明度</td>
+                    </tr>
+                     <tr className="border-t">
+                      <td className="px-4 py-2">effectColor</td>
+                      <td className="px-4 py-2">string</td>
+                      <td className="px-4 py-2">-</td>
+                      <td className="px-4 py-2">动效时的颜色 (默认同基础颜色)</td>
+                    </tr>
+                     <tr className="border-t">
+                      <td className="px-4 py-2">effectSize</td>
+                      <td className="px-4 py-2">number</td>
+                      <td className="px-4 py-2">150</td>
+                      <td className="px-4 py-2">Scan/Pulse 动效的宽度</td>
+                    </tr>
+                    <tr className="border-t">
                       <td className="px-4 py-2">className</td>
                       <td className="px-4 py-2">string</td>
                       <td className="px-4 py-2">-</td>

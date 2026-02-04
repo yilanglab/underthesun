@@ -25,7 +25,17 @@ function buildUsageCode(values: DotPatternParams) {
     fadeLevel,
     effect,
     effectPlaying,
+    effectMaxScale,
+    effectMaxOpacity,
+    effectColor,
+    effectSize,
     hover,
+    hoverRadius,
+    hoverTargetScale,
+    hoverTargetOpacity,
+    hoverColor,
+    hoverTrail,
+    hoverTrailDuration,
   } = values;
   return `import { DotPattern } from "@/registry/ui/dot-pattern";
 
@@ -55,7 +65,27 @@ export function DotPatternDemo() {
   }${
     effect !== "none" && effectPlaying ? `\n        effectPlaying={true}` : ""
   }${
+    effect !== "none" && effectMaxScale !== 1.8 ? `\n        effectMaxScale={${effectMaxScale}}` : ""
+  }${
+    effect !== "none" && effectMaxOpacity !== 0.8 ? `\n        effectMaxOpacity={${effectMaxOpacity}}` : ""
+  }${
+    effect !== "none" && effectColor !== color ? `\n        effectColor="${effectColor}"` : ""
+  }${
+    (effect === "scan" || effect === "pulse") && effectSize !== 150 ? `\n        effectSize={${effectSize}}` : ""
+  }${
     hover ? `\n        hover={true}` : ""
+  }${
+    hover && hoverRadius !== 120 ? `\n        hoverRadius={${hoverRadius}}` : ""
+  }${
+    hover && hoverTargetScale !== 1.8 ? `\n        hoverTargetScale={${hoverTargetScale}}` : ""
+  }${
+    hover && hoverTargetOpacity !== 0.8 ? `\n        hoverTargetOpacity={${hoverTargetOpacity}}` : ""
+  }${
+    hover && hoverColor !== color ? `\n        hoverColor="${hoverColor}"` : ""
+  }${
+    hover && hoverTrail ? `\n        hoverTrail={true}` : ""
+  }${
+    hover && hoverTrail && hoverTrailDuration !== 1.0 ? `\n        hoverTrailDuration={${hoverTrailDuration}}` : ""
   }
       />
     </div>
