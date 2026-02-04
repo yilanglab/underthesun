@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Lock, Unlock, Play, Pause } from "lucide-react";
+import { X, Lock, Unlock, Play, Pause, Plus, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 
@@ -223,10 +223,15 @@ export type DotPatternParams = {
   // Animation - Effects
   effect: "none" | "glow" | "scan" | "pulse";
   effectPlaying: boolean;
+  effectEase: "linear" | "ease-in" | "ease-out" | "ease-in-out";
   effectMaxScale: number;
   effectMaxOpacity: number;
   effectColor: string;
   effectSize: number; // for Scan/Pulse width
+
+  // Multi-color
+  multiColor: boolean;
+  multiColors: { color: string; percent: number }[];
 
   // Animation - Hover
   hover: boolean;
@@ -256,10 +261,17 @@ export const DEFAULT_PARAMS: DotPatternParams = {
   
   effect: "none",
   effectPlaying: false,
+  effectEase: "linear",
   effectMaxScale: 1.8,
   effectMaxOpacity: 0.8,
-  effectColor: "#000000", // Default to match base color, will be updated if base color changes? No, independent.
-  effectSize: 150, // default scan/pulse width
+  effectColor: "#000000", 
+  effectSize: 150,
+
+  multiColor: false,
+  multiColors: [
+    { color: "#FF0000", percent: 50 },
+    { color: "#0000FF", percent: 50 },
+  ],
 
   hover: false,
   hoverRadius: 120,
@@ -439,6 +451,95 @@ export function DotPatternParamsPanel({
                       </div>
                     </div>
 
+                     {/* Multi-color Randomizer */}
+                     <div className="space-y-3 pt-2">
+                        <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-muted-foreground">
+                            Random Colors
+                        </span>
+                        <input
+                            type="checkbox"
+                            checked={params.multiColor}
+                            onChange={(e) => onParamChange("multiColor", e.target.checked)}
+                            className="h-4 w-4 rounded border-input bg-background text-primary focus:ring-offset-background"
+                        />
+                        </div>
+                        
+                        {params.multiColor && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="space-y-3 pl-2 border-l-2 border-muted"
+                        >
+                            {params.multiColors.map((item, index) => (
+                            <div key={index} className="flex gap-2 items-center">
+                                <div className="relative h-6 w-6 rounded-md border overflow-hidden shrink-0">
+                                <input
+                                    type="color"
+                                    className="absolute inset-0 h-full w-full opacity-0 cursor-pointer"
+                                    value={item.color}
+                                    onChange={(e) => {
+                                    const newColors = [...params.multiColors];
+                                    newColors[index].color = e.target.value;
+                                    onParamChange("multiColors", newColors);
+                                    }}
+                                />
+                                <div
+                                    className="h-full w-full"
+                                    style={{ backgroundColor: item.color }}
+                                />
+                                </div>
+                                <div className="flex-1">
+                                    <Slider
+                                        value={[item.percent]}
+                                        min={0}
+                                        max={100}
+                                        step={5}
+                                        onValueChange={([val]) => {
+                                            const newColors = [...params.multiColors];
+                                            newColors[index].percent = val;
+                                            onParamChange("multiColors", newColors);
+                                        }}
+                                        className="[&_[role=slider]]:h-3 [&_[role=slider]]:w-3"
+                                    />
+                                </div>
+                                <span className="text-[10px] w-8 font-mono text-right">{item.percent}%</span>
+                                {params.multiColors.length > 2 && (
+                                    <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-5 w-5 text-muted-foreground hover:text-destructive"
+                                    onClick={() => {
+                                        const newColors = params.multiColors.filter((_, i) => i !== index);
+                                        onParamChange("multiColors", newColors);
+                                    }}
+                                    >
+                                    <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                )}
+                            </div>
+                            ))}
+                            {params.multiColors.length < 4 && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full h-7 text-xs"
+                                onClick={() => {
+                                    const newColors = [...params.multiColors, { color: "#000000", percent: 20 }];
+                                    onParamChange("multiColors", newColors);
+                                }}
+                            >
+                                <Plus className="h-3 w-3 mr-1" /> Add Color
+                            </Button>
+                            )}
+                            <div className="text-[10px] text-muted-foreground text-right">
+                                Total: {params.multiColors.reduce((acc, curr) => acc + curr.percent, 0)}%
+                            </div>
+                        </motion.div>
+                        )}
+                    </div>
+
                     <SliderRow
                       label="Opacity"
                       value={params.opacity}
@@ -565,6 +666,20 @@ export function DotPatternParamsPanel({
                         exit={{ height: 0, opacity: 0 }}
                         className="space-y-5 pt-2"
                       >
+                         {(params.effect === "scan" || params.effect === "pulse") && (
+                            <ButtonGroup
+                            label="Easing"
+                            value={params.effectEase}
+                            options={[
+                                { label: "Linear", value: "linear" },
+                                { label: "In", value: "ease-in" },
+                                { label: "Out", value: "ease-out" },
+                                { label: "In-Out", value: "ease-in-out" },
+                            ]}
+                            onChange={(val) => onParamChange("effectEase", val)}
+                            />
+                         )}
+
                          <div className="space-y-2">
                           <span className="text-xs font-medium text-muted-foreground">
                             Effect Color

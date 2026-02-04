@@ -273,6 +273,24 @@ export function DotPatternClient({
                       <td className="px-4 py-2">150</td>
                       <td className="px-4 py-2">Scan/Pulse 动效的宽度</td>
                     </tr>
+                     <tr className="border-t">
+                      <td className="px-4 py-2">effectEase</td>
+                      <td className="px-4 py-2">enum</td>
+                      <td className="px-4 py-2">linear</td>
+                      <td className="px-4 py-2">动效缓动函数：linear / ease-in / ease-out / ease-in-out</td>
+                    </tr>
+                     <tr className="border-t">
+                      <td className="px-4 py-2">multiColor</td>
+                      <td className="px-4 py-2">boolean</td>
+                      <td className="px-4 py-2">false</td>
+                      <td className="px-4 py-2">是否启用随机多彩模式</td>
+                    </tr>
+                     <tr className="border-t">
+                      <td className="px-4 py-2">multiColors</td>
+                      <td className="px-4 py-2">array</td>
+                      <td className="px-4 py-2">[]</td>
+                      <td className="px-4 py-2">随机色彩配置数组，如 {"[{ color: '#FF0000', percent: 50 }, ...]"}</td>
+                    </tr>
                     <tr className="border-t">
                       <td className="px-4 py-2">className</td>
                       <td className="px-4 py-2">string</td>

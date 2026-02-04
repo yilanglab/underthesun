@@ -19,10 +19,14 @@ type DotPatternProps = {
   fadeLevel?: "weak" | "medium" | "strong";
   effect?: "glow" | "scan" | "pulse" | "none";
   effectPlaying?: boolean;
+  effectEase?: "linear" | "ease-in" | "ease-out" | "ease-in-out";
   effectMaxScale?: number;
   effectMaxOpacity?: number;
   effectColor?: string;
   effectSize?: number;
+
+  multiColor?: boolean;
+  multiColors?: { color: string; percent: number }[];
 
   hover?: boolean;
   hoverRadius?: number;
@@ -53,10 +57,14 @@ export function DotPattern({
   fadeLevel = "weak",
   effect = "none",
   effectPlaying = false,
+  effectEase = "linear",
   effectMaxScale = 1.8,
   effectMaxOpacity = 0.8,
   effectColor,
   effectSize = 150,
+
+  multiColor = false,
+  multiColors = [],
 
   hover = false,
   hoverRadius = 120,

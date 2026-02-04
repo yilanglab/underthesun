@@ -29,6 +29,9 @@ function buildUsageCode(values: DotPatternParams) {
     effectMaxOpacity,
     effectColor,
     effectSize,
+    effectEase,
+    multiColor,
+    multiColors,
     hover,
     hoverRadius,
     hoverTargetScale,
@@ -72,6 +75,14 @@ export function DotPatternDemo() {
     effect !== "none" && effectColor !== color ? `\n        effectColor="${effectColor}"` : ""
   }${
     (effect === "scan" || effect === "pulse") && effectSize !== 150 ? `\n        effectSize={${effectSize}}` : ""
+  }${
+    (effect === "scan" || effect === "pulse") && effectEase !== "linear" ? `\n        effectEase="${effectEase}"` : ""
+  }${
+    multiColor ? `\n        multiColor={true}` : ""
+  }${
+    multiColor && multiColors && multiColors.length > 0
+      ? `\n        multiColors={${JSON.stringify(multiColors)}}`
+      : ""
   }${
     hover ? `\n        hover={true}` : ""
   }${
