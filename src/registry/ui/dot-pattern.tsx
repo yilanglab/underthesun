@@ -156,14 +156,18 @@ export function DotPattern({
       const time = effectPlaying ? (timestamp - startTime) / 1000 : 0;
       
       // Scan effect variables
-      const scanSpeed = 200; // px per second
       const scanWidth = effectSize; 
-      const scanX = (time * scanSpeed) % (containerWidth + scanWidth * 2) - scanWidth;
+      // Scan cycle is effectDuration
+      const scanDistance = containerWidth + scanWidth * 2;
+      const scanProgress = (time % effectDuration) / effectDuration;
+      const easedScanProgress = getEasedValue(scanProgress);
+      const scanX = easedScanProgress * scanDistance - scanWidth;
 
       // Pulse effect variables
-      const pulseSpeed = 100; // px per second
       const pulseMaxRadius = Math.max(containerWidth, containerHeight);
-      const pulseRadius = (time * pulseSpeed) % pulseMaxRadius;
+      const pulseProgress = (time % effectDuration) / effectDuration;
+      const easedPulseProgress = getEasedValue(pulseProgress);
+      const pulseRadius = easedPulseProgress * pulseMaxRadius;
       const pulseWidth = effectSize;
 
       // Draw dots
@@ -188,7 +192,8 @@ export function DotPattern({
           if (effect === "glow") {
             // Deterministic "random" based on position
             const seed = (i * cols + j) * 123.45;
-            const freq = 0.5 + (seed % 1); // 0.5 to 1.5 Hz
+            // Constant frequency based on duration (1 cycle per duration)
+            const freq = 1 / effectDuration; 
             const phase = seed % (Math.PI * 2);
             // Oscillate between 0 and 1
             effectIntensity = (Math.sin(time * Math.PI * 2 * freq + phase) + 1) / 2;
