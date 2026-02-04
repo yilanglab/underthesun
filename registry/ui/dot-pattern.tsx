@@ -198,11 +198,11 @@ export function DotPattern({
 
           // Glow effect: Random-looking pulse for each dot
           if (effect === "glow") {
-            // Deterministic "random" based on position
-            const seed = (i * cols + j) * 123.45;
-            // Constant frequency based on duration (1 cycle per duration)
+            // Improve randomness to avoid wave patterns
+            // Use a pseudo-random hash based on coordinates
+            const randomSeed = Math.abs(Math.sin(i * 12.9898 + j * 78.233) * 43758.5453); 
             const freq = 1 / effectDuration; 
-            const phase = seed % (Math.PI * 2);
+            const phase = randomSeed * Math.PI * 2;
             // Oscillate between 0 and 1
             effectIntensity = (Math.sin(time * Math.PI * 2 * freq + phase) + 1) / 2;
           }
@@ -293,22 +293,32 @@ export function DotPattern({
 
              if (multiColor && multiColors && multiColors.length > 0) {
                 // Multi-Color Mode: Active dots get random color
-                // This applies to both Effect and Hover animations
+                // Use Golden Ratio for better distribution than previous 137.5 (which gave 0.5 steps)
                 const dotIndex = i * cols + j;
-                const seed = (dotIndex * 137.5) % 1; 
+                const phi = 0.618033988749895; 
+                const seed = (dotIndex * phi) % 1; 
+                
                 let cumulative = 0;
+                let found = false;
                 for (const item of multiColors) {
                    cumulative += item.percent;
                    if (seed * 100 < cumulative) {
                       finalColor = item.color;
+                      found = true;
                       break;
                    }
+                }
+                // Fallback to last color if rounding errors or incomplete percentages
+                if (!found && multiColors.length > 0) {
+                    finalColor = multiColors[multiColors.length - 1].color;
                 }
              } else {
                  // Single Color Mode
                  // Priority: Hover > Effect
-                 // If hover is active (above threshold), prioritize hover color
-                 if (hoverIntensity > 0.05) {
+                 // Use intensity comparison to determine which color to show
+                 // This allows a strong effect (e.g. scan) to remain visible even if hover is weak
+                 // But if hover is strong (near mouse), it overrides effect
+                 if (hoverIntensity > effectIntensity) {
                     finalColor = activeHoverColor;
                  } else {
                     finalColor = activeEffectColor;
