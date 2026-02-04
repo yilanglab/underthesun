@@ -561,10 +561,6 @@ export function DotPattern({
         <canvas
           ref={canvasRef}
           className="pointer-events-none absolute inset-0 h-full w-full"
-          style={{ mask: fade ? `radial-gradient(circle at center, black 0%, black 30%, transparent 70%)` : undefined }} // Simple CSS mask for canvas fade approximation if needed, or rely on SVG mask covering it? 
-          // SVG mask is on the rect fill, not the whole div. The canvas sits on top.
-          // To match fade on canvas, we'd need to clear canvas pixels or use CSS mask.
-          // For now let's apply a CSS mask similar to the SVG one if fade is true.
         />
       )}
       {fade && (effect !== "none" || hover) && (
