@@ -88,6 +88,24 @@ export function DotPattern({
   const activeEffectColor = effectColor ?? color;
   const activeHoverColor = hoverColor ?? color;
 
+  // Easing helpers for effect timing
+  const easeIn = (t: number) => t * t * t;
+  const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+  const easeInOut = (t: number) =>
+    t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const getEasedValue = (t: number) => {
+    switch (effectEase) {
+      case "ease-in":
+        return easeIn(t);
+      case "ease-out":
+        return easeOut(t);
+      case "ease-in-out":
+        return easeInOut(t);
+      default:
+        return t;
+    }
+  };
+
   useEffect(() => {
     // Only run canvas logic if effects are enabled or hover is on
     if (effect === "none" && !hover) {
@@ -146,14 +164,18 @@ export function DotPattern({
       const time = effectPlaying ? (timestamp - startTime) / 1000 : 0;
       
       // Scan effect variables
-      const scanSpeed = 200; // px per second
       const scanWidth = effectSize; 
-      const scanX = (time * scanSpeed) % (containerWidth + scanWidth * 2) - scanWidth;
+      // Scan cycle is effectDuration
+      const scanDistance = containerWidth + scanWidth * 2;
+      const scanProgress = (time % effectDuration) / effectDuration;
+      const easedScanProgress = getEasedValue(scanProgress);
+      const scanX = easedScanProgress * scanDistance - scanWidth;
 
       // Pulse effect variables
-      const pulseSpeed = 100; // px per second
       const pulseMaxRadius = Math.max(containerWidth, containerHeight);
-      const pulseRadius = (time * pulseSpeed) % pulseMaxRadius;
+      const pulseProgress = (time % effectDuration) / effectDuration;
+      const easedPulseProgress = getEasedValue(pulseProgress);
+      const pulseRadius = easedPulseProgress * pulseMaxRadius;
       const pulseWidth = effectSize;
 
       // Draw dots
@@ -178,7 +200,8 @@ export function DotPattern({
           if (effect === "glow") {
             // Deterministic "random" based on position
             const seed = (i * cols + j) * 123.45;
-            const freq = 0.5 + (seed % 1); // 0.5 to 1.5 Hz
+            // Constant frequency based on duration (1 cycle per duration)
+            const freq = 1 / effectDuration; 
             const phase = seed % (Math.PI * 2);
             // Oscillate between 0 and 1
             effectIntensity = (Math.sin(time * Math.PI * 2 * freq + phase) + 1) / 2;
@@ -322,7 +345,7 @@ export function DotPattern({
     };
   }, [
     width, height, x, y, cx, cy, cr, shape, strokeWidth, mode, color, opacity, 
-    effect, effectPlaying, effectMaxScale, effectMaxOpacity, effectSize, activeEffectColor,
+    effect, effectPlaying, effectEase, effectMaxScale, effectMaxOpacity, effectSize, effectDuration, activeEffectColor,
     hover, hoverRadius, hoverTargetScale, hoverTargetOpacity, activeHoverColor, hoverTrail, hoverTrailDuration,
     mousePos
   ]);
@@ -491,13 +514,21 @@ export function DotPattern({
         />
       )}
       {fade && (effect !== "none" || hover) && (
-        // Apply CSS mask to container div if fade is on? No, that would fade bg too.
-        // We need to fade the canvas.
         <style jsx>{`
           canvas {
-            mask-image: radial-gradient(circle at 50% 50%, black 0%, black ${fadeLevel === 'strong' ? '30%' : fadeLevel === 'medium' ? '50%' : '70%'}, transparent ${fadeLevel === 'strong' ? '70%' : fadeLevel === 'medium' ? '90%' : '100%'});
-            -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, black ${fadeLevel === 'strong' ? '30%' : fadeLevel === 'medium' ? '50%' : '70%'}, transparent ${fadeLevel === 'strong' ? '70%' : fadeLevel === 'medium' ? '90%' : '100%'});
+            mask-image: radial-gradient(circle farthest-corner at 50% 50%, black 0%, black 70%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle farthest-corner at 50% 50%, black 0%, black 70%, transparent 100%);
           }
+          ${fadeLevel === 'medium' ? `
+          canvas {
+            mask-image: radial-gradient(circle farthest-side at 50% 50%, black 0%, black 50%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle farthest-side at 50% 50%, black 0%, black 50%, transparent 100%);
+          }` : ''}
+          ${fadeLevel === 'strong' ? `
+          canvas {
+            mask-image: radial-gradient(circle closest-side at 50% 50%, black 0%, black 30%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle closest-side at 50% 50%, black 0%, black 30%, transparent 100%);
+          }` : ''}
         `}</style>
       )}
     </div>

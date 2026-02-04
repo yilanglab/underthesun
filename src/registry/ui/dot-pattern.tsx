@@ -98,6 +98,24 @@ export function DotPattern({
   const activeEffectColor = effectColor ?? color;
   const activeHoverColor = hoverColor ?? color;
 
+  // Easing helpers for effect timing
+  const easeIn = (t: number) => t * t * t;
+  const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+  const easeInOut = (t: number) =>
+    t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const getEasedValue = (t: number) => {
+    switch (effectEase) {
+      case "ease-in":
+        return easeIn(t);
+      case "ease-out":
+        return easeOut(t);
+      case "ease-in-out":
+        return easeInOut(t);
+      default:
+        return t;
+    }
+  };
+
   useEffect(() => {
     // Only run canvas logic if effects are enabled or hover is on
     if (effect === "none" && !hover) {
@@ -337,7 +355,7 @@ export function DotPattern({
     };
   }, [
     width, height, x, y, cx, cy, cr, shape, strokeWidth, mode, color, opacity, 
-    effect, effectPlaying, effectMaxScale, effectMaxOpacity, effectSize, activeEffectColor,
+    effect, effectPlaying, effectEase, effectMaxScale, effectMaxOpacity, effectSize, effectDuration, activeEffectColor,
     hover, hoverRadius, hoverTargetScale, hoverTargetOpacity, activeHoverColor, hoverTrail, hoverTrailDuration,
     mousePos
   ]);
@@ -506,13 +524,21 @@ export function DotPattern({
         />
       )}
       {fade && (effect !== "none" || hover) && (
-        // Apply CSS mask to container div if fade is on? No, that would fade bg too.
-        // We need to fade the canvas.
         <style jsx>{`
           canvas {
-            mask-image: radial-gradient(circle at 50% 50%, black 0%, black ${fadeLevel === 'strong' ? '30%' : fadeLevel === 'medium' ? '50%' : '70%'}, transparent ${fadeLevel === 'strong' ? '70%' : fadeLevel === 'medium' ? '90%' : '100%'});
-            -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, black ${fadeLevel === 'strong' ? '30%' : fadeLevel === 'medium' ? '50%' : '70%'}, transparent ${fadeLevel === 'strong' ? '70%' : fadeLevel === 'medium' ? '90%' : '100%'});
+            mask-image: radial-gradient(circle farthest-corner at 50% 50%, black 0%, black 70%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle farthest-corner at 50% 50%, black 0%, black 70%, transparent 100%);
           }
+          ${fadeLevel === 'medium' ? `
+          canvas {
+            mask-image: radial-gradient(circle farthest-side at 50% 50%, black 0%, black 50%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle farthest-side at 50% 50%, black 0%, black 50%, transparent 100%);
+          }` : ''}
+          ${fadeLevel === 'strong' ? `
+          canvas {
+            mask-image: radial-gradient(circle closest-side at 50% 50%, black 0%, black 30%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle closest-side at 50% 50%, black 0%, black 30%, transparent 100%);
+          }` : ''}
         `}</style>
       )}
     </div>
