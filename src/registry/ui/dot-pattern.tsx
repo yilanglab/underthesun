@@ -24,6 +24,7 @@ type DotPatternProps = {
   effectMaxOpacity?: number;
   effectColor?: string;
   effectSize?: number;
+  effectDuration?: number;
 
   multiColor?: boolean;
   multiColors?: { color: string; percent: number }[];
@@ -62,6 +63,7 @@ export function DotPattern({
   effectMaxOpacity = 0.8,
   effectColor,
   effectSize = 150,
+  effectDuration = 1.0,
 
   multiColor = false,
   multiColors = [],

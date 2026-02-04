@@ -228,6 +228,7 @@ export type DotPatternParams = {
   effectMaxOpacity: number;
   effectColor: string;
   effectSize: number; // for Scan/Pulse width
+  effectDuration: number;
 
   // Multi-color
   multiColor: boolean;
@@ -266,6 +267,7 @@ export const DEFAULT_PARAMS: DotPatternParams = {
   effectMaxOpacity: 0.8,
   effectColor: "#000000", 
   effectSize: 150,
+  effectDuration: 1.0,
 
   multiColor: false,
   multiColors: [
@@ -451,95 +453,6 @@ export function DotPatternParamsPanel({
                       </div>
                     </div>
 
-                     {/* Multi-color Randomizer */}
-                     <div className="space-y-3 pt-2">
-                        <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-muted-foreground">
-                            Random Colors
-                        </span>
-                        <input
-                            type="checkbox"
-                            checked={params.multiColor}
-                            onChange={(e) => onParamChange("multiColor", e.target.checked)}
-                            className="h-4 w-4 rounded border-input bg-background text-primary focus:ring-offset-background"
-                        />
-                        </div>
-                        
-                        {params.multiColor && (
-                        <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="space-y-3 pl-2 border-l-2 border-muted"
-                        >
-                            {params.multiColors.map((item, index) => (
-                            <div key={index} className="flex gap-2 items-center">
-                                <div className="relative h-6 w-6 rounded-md border overflow-hidden shrink-0">
-                                <input
-                                    type="color"
-                                    className="absolute inset-0 h-full w-full opacity-0 cursor-pointer"
-                                    value={item.color}
-                                    onChange={(e) => {
-                                    const newColors = [...params.multiColors];
-                                    newColors[index].color = e.target.value;
-                                    onParamChange("multiColors", newColors);
-                                    }}
-                                />
-                                <div
-                                    className="h-full w-full"
-                                    style={{ backgroundColor: item.color }}
-                                />
-                                </div>
-                                <div className="flex-1">
-                                    <Slider
-                                        value={[item.percent]}
-                                        min={0}
-                                        max={100}
-                                        step={5}
-                                        onValueChange={([val]) => {
-                                            const newColors = [...params.multiColors];
-                                            newColors[index].percent = val;
-                                            onParamChange("multiColors", newColors);
-                                        }}
-                                        className="[&_[role=slider]]:h-3 [&_[role=slider]]:w-3"
-                                    />
-                                </div>
-                                <span className="text-[10px] w-8 font-mono text-right">{item.percent}%</span>
-                                {params.multiColors.length > 2 && (
-                                    <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-5 w-5 text-muted-foreground hover:text-destructive"
-                                    onClick={() => {
-                                        const newColors = params.multiColors.filter((_, i) => i !== index);
-                                        onParamChange("multiColors", newColors);
-                                    }}
-                                    >
-                                    <Trash2 className="h-3 w-3" />
-                                    </Button>
-                                )}
-                            </div>
-                            ))}
-                            {params.multiColors.length < 4 && (
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="w-full h-7 text-xs"
-                                onClick={() => {
-                                    const newColors = [...params.multiColors, { color: "#000000", percent: 20 }];
-                                    onParamChange("multiColors", newColors);
-                                }}
-                            >
-                                <Plus className="h-3 w-3 mr-1" /> Add Color
-                            </Button>
-                            )}
-                            <div className="text-[10px] text-muted-foreground text-right">
-                                Total: {params.multiColors.reduce((acc, curr) => acc + curr.percent, 0)}%
-                            </div>
-                        </motion.div>
-                        )}
-                    </div>
-
                     <SliderRow
                       label="Opacity"
                       value={params.opacity}
@@ -679,6 +592,15 @@ export function DotPatternParamsPanel({
                             onChange={(val) => onParamChange("effectEase", val)}
                             />
                          )}
+
+                         <SliderRow
+                          label="Duration"
+                          value={params.effectDuration}
+                          min={0.1}
+                          max={10}
+                          step={0.1}
+                          onChange={(val) => onParamChange("effectDuration", val)}
+                        />
 
                          <div className="space-y-2">
                           <span className="text-xs font-medium text-muted-foreground">

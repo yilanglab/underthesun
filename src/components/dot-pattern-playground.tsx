@@ -119,6 +119,7 @@ export function DotPatternPlayground({
         effectColor={params.effectColor}
         effectSize={params.effectSize}
         effectEase={params.effectEase}
+        effectDuration={params.effectDuration}
         multiColor={params.multiColor}
         multiColors={params.multiColors}
         hover={params.hover}

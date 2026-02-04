@@ -30,6 +30,7 @@ function buildUsageCode(values: DotPatternParams) {
     effectColor,
     effectSize,
     effectEase,
+    effectDuration,
     multiColor,
     multiColors,
     hover,
@@ -77,6 +78,8 @@ export function DotPatternDemo() {
     (effect === "scan" || effect === "pulse") && effectSize !== 150 ? `\n        effectSize={${effectSize}}` : ""
   }${
     (effect === "scan" || effect === "pulse") && effectEase !== "linear" ? `\n        effectEase="${effectEase}"` : ""
+  }${
+    effect !== "none" && effectDuration !== 1.0 ? `\n        effectDuration={${effectDuration}}` : ""
   }${
     multiColor ? `\n        multiColor={true}` : ""
   }${

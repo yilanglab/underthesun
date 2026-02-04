@@ -280,6 +280,12 @@ export function DotPatternClient({
                       <td className="px-4 py-2">动效缓动函数：linear / ease-in / ease-out / ease-in-out</td>
                     </tr>
                      <tr className="border-t">
+                      <td className="px-4 py-2">effectDuration</td>
+                      <td className="px-4 py-2">number</td>
+                      <td className="px-4 py-2">1.0</td>
+                      <td className="px-4 py-2">动效持续时间（秒）</td>
+                    </tr>
+                     <tr className="border-t">
                       <td className="px-4 py-2">multiColor</td>
                       <td className="px-4 py-2">boolean</td>
                       <td className="px-4 py-2">false</td>
