@@ -4,6 +4,49 @@
 import Image from "next/image";
  import { cn } from "@/lib/utils";
 
+function splitTextIntoMeasuredLines(text: string, maxWidth: number): string[] {
+  if (!text) return [];
+  if (maxWidth <= 0) return [text];
+  if (typeof document === "undefined") return [text];
+
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  if (!context) return [text];
+
+  context.font = '400 14px "PingFang SC","Helvetica Neue",Arial,sans-serif';
+
+  const lines: string[] = [];
+  const sourceLines = text.split("\n");
+
+  sourceLines.forEach((sourceLine, index) => {
+    if (sourceLine.length === 0) {
+      // Preserve explicit blank lines from source text.
+      lines.push("");
+    } else {
+      let currentLine = "";
+      for (const char of sourceLine) {
+        const candidate = currentLine + char;
+        if (context.measureText(candidate).width <= maxWidth || currentLine === "") {
+          currentLine = candidate;
+        } else {
+          lines.push(currentLine);
+          currentLine = char;
+        }
+      }
+      if (currentLine) lines.push(currentLine);
+    }
+
+    // Preserve a single newline between two non-empty source lines.
+    const hasNext = index < sourceLines.length - 1;
+    const nextLine = hasNext ? sourceLines[index + 1] : undefined;
+    if (hasNext && sourceLine.length > 0 && nextLine && nextLine.length > 0) {
+      lines.push("");
+    }
+  });
+
+  return lines;
+}
+
  export type ThinkingOutputProps = {
   /** 气泡标题，如“思考中” */
   bubbleText?: string;
@@ -21,6 +64,8 @@ import Image from "next/image";
   streamChunkSize?: number;
   /** 每次输出间隔（毫秒） */
   streamIntervalMs?: number;
+  /** 流式输出样式 */
+  streamVariant?: "classic" | "line-reveal";
   /** 思维链容器宽度（默认 720） */
   chainWidth?: number;
   /** 气泡最大宽度（默认 360） */
@@ -42,6 +87,7 @@ import Image from "next/image";
   enableStreaming = true,
   streamChunkSize = 2,
   streamIntervalMs = 22,
+  streamVariant = "classic",
   chainWidth = 720,
   bubbleMaxWidth = 360,
   autoCollapseOnComplete = true,
@@ -52,12 +98,41 @@ import Image from "next/image";
   const [displayedText, setDisplayedText] = React.useState("");
   const [streamCursor, setStreamCursor] = React.useState(0);
   const [completed, setCompleted] = React.useState(!enableStreaming);
-  const chainInnerRef = React.useRef<HTMLParagraphElement | null>(null);
+  const [lineItems, setLineItems] = React.useState<
+    { text: string; blurred: boolean }[]
+  >([]);
+  const lineCursorRef = React.useRef(0);
+  const chainInnerRef = React.useRef<HTMLDivElement | null>(null);
+  const chainViewportRef = React.useRef<HTMLDivElement | null>(null);
   const [collapsedTranslateY, setCollapsedTranslateY] = React.useState(0);
+  const [lineWrapWidth, setLineWrapWidth] = React.useState(0);
+  const measuredLines = React.useMemo(
+    () =>
+      streamVariant === "line-reveal"
+        ? splitTextIntoMeasuredLines(
+            chainText,
+            lineWrapWidth > 0 ? lineWrapWidth : Math.max(chainWidth - 56, 1)
+          )
+        : [],
+    [chainText, chainWidth, lineWrapWidth, streamVariant]
+  );
+
+  React.useLayoutEffect(() => {
+    if (!chainViewportRef.current) return;
+    const element = chainViewportRef.current;
+    const updateWidth = () => setLineWrapWidth(element.clientWidth);
+    updateWidth();
+
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
 
   React.useEffect(() => {
     setExpanded(defaultExpanded);
     setCompleted(!enableStreaming);
+    setLineItems([]);
+    lineCursorRef.current = 0;
     if (!enableStreaming) {
       setDisplayedText(chainText);
       setStreamCursor(chainText.length);
@@ -69,23 +144,58 @@ import Image from "next/image";
 
   React.useEffect(() => {
     if (!enableStreaming || completed) return;
+    if (streamVariant === "classic") {
+      const timer = window.setInterval(() => {
+        setStreamCursor((prev) => {
+          const next = Math.min(prev + streamChunkSize, chainText.length);
+          setDisplayedText(chainText.slice(0, next));
+          if (next >= chainText.length) {
+            setCompleted(true);
+            onComplete?.();
+          }
+          return next;
+        });
+      }, streamIntervalMs);
+      return () => window.clearInterval(timer);
+    }
+
+    if (!measuredLines.length) return;
     const timer = window.setInterval(() => {
-      setStreamCursor((prev) => {
-        const next = Math.min(prev + streamChunkSize, chainText.length);
-        setDisplayedText(chainText.slice(0, next));
-        if (next >= chainText.length) {
-          setCompleted(true);
-          onComplete?.();
+      const currentIndex = lineCursorRef.current;
+      if (currentIndex >= measuredLines.length) return;
+
+      const incomingLine = measuredLines[currentIndex];
+      const nextLineIndex = currentIndex + 1;
+      const done = nextLineIndex >= measuredLines.length;
+
+      setLineItems((prevItems) => {
+        const items = [...prevItems];
+        if (items.length) {
+          items[items.length - 1] = {
+            ...items[items.length - 1],
+            blurred: false,
+          };
         }
-        return next;
+        const isBreakOnly = incomingLine.length === 0;
+        items.push({ text: incomingLine, blurred: isBreakOnly ? false : !done });
+        return items;
       });
-    }, streamIntervalMs);
+
+      lineCursorRef.current = nextLineIndex;
+
+      if (done) {
+        setCompleted(true);
+        onComplete?.();
+      }
+    }, Math.max(streamIntervalMs, 380));
     return () => window.clearInterval(timer);
   }, [
     chainText,
     completed,
     enableStreaming,
+    measuredLines,
     onComplete,
+    streamVariant,
     streamChunkSize,
     streamIntervalMs,
   ]);
@@ -106,7 +216,7 @@ import Image from "next/image";
     const contentHeight = chainInnerRef.current.scrollHeight;
     const visibleHeight = 78;
     setCollapsedTranslateY(Math.max(contentHeight - visibleHeight, 0));
-  }, [chainText, completed, displayedText, expanded]);
+  }, [chainText, completed, displayedText, expanded, lineItems]);
 
   const shouldFullyCollapse = completed && autoCollapseOnComplete && !expanded;
   const bubbleLabel = completed ? "思考过程" : bubbleText;
@@ -230,6 +340,7 @@ import Image from "next/image";
           aria-hidden
         />
         <div
+          ref={chainViewportRef}
           className={cn(
             "relative w-full self-stretch overflow-hidden",
             expanded ? "max-h-[420px]" : shouldFullyCollapse ? "h-0" : "h-[78px]"
@@ -245,23 +356,55 @@ import Image from "next/image";
               aria-hidden
             />
           ) : null}
-          <p
+          <div
             ref={chainInnerRef}
-            className={cn(
-              "w-full whitespace-pre-wrap wrap-break-word text-justify text-[14px] leading-[22px]",
-              "text-[rgba(38,38,41,0.72)]"
-            )}
+            className="w-full"
             style={{
-              fontFamily: '"PingFang SC","Helvetica Neue",Arial,sans-serif',
               transform: !expanded ? `translateY(-${collapsedTranslateY}px)` : undefined,
               transition: "transform 120ms linear",
             }}
           >
-            {enableStreaming ? displayedText : chainText}
-            {enableStreaming && !completed && streamCursor < chainText.length ? (
-              <span className="ml-0.5 inline-block h-[14px] w-px animate-pulse bg-[rgba(38,38,41,0.72)] align-middle" />
-            ) : null}
-          </p>
+            {streamVariant === "classic" ? (
+              <p
+                className={cn(
+                  "w-full whitespace-pre-wrap wrap-break-word text-justify text-[14px] leading-[22px]",
+                  "text-[rgba(38,38,41,0.72)]"
+                )}
+                style={{ fontFamily: '"PingFang SC","Helvetica Neue",Arial,sans-serif' }}
+              >
+                {enableStreaming ? displayedText : chainText}
+                {enableStreaming && !completed && streamCursor < chainText.length ? (
+                  <span className="ml-0.5 inline-block h-[14px] w-px animate-pulse bg-[rgba(38,38,41,0.72)] align-middle" />
+                ) : null}
+              </p>
+            ) : (
+              <div>
+                {(enableStreaming
+                  ? lineItems
+                  : splitTextIntoMeasuredLines(
+                      chainText,
+                      lineWrapWidth > 0 ? lineWrapWidth : Math.max(chainWidth - 56, 1)
+                    ).map((text) => ({ text, blurred: false }))
+                ).map(
+                  (item, idx) => (
+                    <p
+                      key={idx}
+                      className={cn(
+                        "w-full whitespace-pre-wrap wrap-break-word text-justify text-[14px] leading-[22px] text-[rgba(38,38,41,0.72)]",
+                        "transition-[opacity,filter] duration-250 ease-out",
+                        item.blurred
+                          ? "opacity-20 filter-[blur(3px)] animate-[lineRevealEnter_260ms_ease-out_forwards]"
+                          : "opacity-100 filter-[blur(0px)]"
+                      )}
+                      style={{ fontFamily: '"PingFang SC","Helvetica Neue",Arial,sans-serif' }}
+                    >
+                      {item.text || "\u00A0"}
+                    </p>
+                  )
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
       <style jsx>{`
@@ -271,6 +414,17 @@ import Image from "next/image";
           }
           100% {
             background-position: -140% 50%;
+          }
+        }
+
+        @keyframes lineRevealEnter {
+          0% {
+            opacity: 0;
+            filter: blur(3px);
+          }
+          100% {
+            opacity: 0.2;
+            filter: blur(3px);
           }
         }
       `}</style>

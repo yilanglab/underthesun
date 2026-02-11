@@ -18,6 +18,8 @@ const sampleChainText = `先快速澄清目标：这次不是直接给投放计�
 export default function DialogueThinkingTestPage() {
   const [playKey, setPlayKey] = React.useState(0);
   const [started, setStarted] = React.useState(false);
+  const [showStreamA, setShowStreamA] = React.useState(true);
+  const [showStreamB, setShowStreamB] = React.useState(true);
 
   const handlePlay = () => {
     setStarted(true);
@@ -53,19 +55,75 @@ export default function DialogueThinkingTestPage() {
           <span className="text-xs text-muted-foreground">
             点击后开始一轮思考流式输出演示
           </span>
+          <button
+            type="button"
+            onClick={() => setShowStreamA((v) => !v)}
+            className={`rounded-md border px-3 py-1.5 text-xs transition-colors ${
+              showStreamA
+                ? "border-foreground/30 bg-foreground/10 text-foreground"
+                : "border-border text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            流式A
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowStreamB((v) => !v)}
+            className={`rounded-md border px-3 py-1.5 text-xs transition-colors ${
+              showStreamB
+                ? "border-foreground/30 bg-foreground/10 text-foreground"
+                : "border-border text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            流式B
+          </button>
         </div>
 
         {started ? (
-          <ThinkingOutput
-            key={playKey}
-            bubbleText="思考中"
-            chainText={sampleChainText}
-            defaultExpanded={false}
-            enableStreaming
-            streamChunkSize={1}
-            streamIntervalMs={20}
-            autoCollapseOnComplete
-          />
+          <div className="space-y-8">
+            {showStreamA ? (
+              <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground">
+                样式 A（当前效果）
+              </p>
+              <ThinkingOutput
+                key={`classic-${playKey}`}
+                bubbleText="思考中"
+                chainText={sampleChainText}
+                defaultExpanded={false}
+                enableStreaming
+                streamVariant="classic"
+                streamChunkSize={1}
+                streamIntervalMs={20}
+                autoCollapseOnComplete
+              />
+              </div>
+            ) : null}
+
+            {showStreamB ? (
+              <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground">
+                样式 B（按行模糊 → 清晰）
+              </p>
+              <ThinkingOutput
+                key={`line-reveal-${playKey}`}
+                bubbleText="思考中"
+                chainText={sampleChainText}
+                defaultExpanded={false}
+                enableStreaming
+                streamVariant="line-reveal"
+                streamIntervalMs={420}
+                autoCollapseOnComplete
+              />
+              </div>
+            ) : null}
+
+            {!showStreamA && !showStreamB ? (
+              <div className="rounded-md border border-dashed px-3 py-2 text-sm text-muted-foreground">
+                当前已隐藏所有流式样式，请开启“流式A”或“流式B”。
+              </div>
+            ) : null}
+          </div>
         ) : (
           <div className="rounded-md border border-dashed px-3 py-2 text-sm text-muted-foreground">
             尚未播放，点击上方“播放”按钮开始。
