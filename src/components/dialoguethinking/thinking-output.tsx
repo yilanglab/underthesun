@@ -80,7 +80,7 @@ function splitTextIntoMeasuredLines(text: string, maxWidth: number): string[] {
 
  export function ThinkingOutput({
   bubbleText = "思考中",
-  bubbleIconSrc = "/mtl/Artboard%201%20(1).gif",
+  bubbleIconSrc = "/mtl/Artboard%201%20%281%29.gif",
   completedIconSrc = "/mtl/Frame%202119900916.svg",
   chainText,
   defaultExpanded = false,
@@ -223,6 +223,13 @@ function splitTextIntoMeasuredLines(text: string, maxWidth: number): string[] {
   const arrowTextColor = completed
     ? "text-[rgba(51,55,61,0.58)]"
     : "text-[rgba(38,38,41,0.72)]";
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+  const withBasePath = (src: string) => {
+    if (!src.startsWith("/") || src.startsWith("//")) return src;
+    if (!basePath) return src;
+    if (src === basePath || src.startsWith(`${basePath}/`)) return src;
+    return `${basePath}${src}`;
+  };
 
   return (
     <section
@@ -245,7 +252,7 @@ function splitTextIntoMeasuredLines(text: string, maxWidth: number): string[] {
         <span className="inline-flex items-center gap-[5px]">
           <span className="inline-flex h-[18px] w-[18px] items-center justify-center">
             <Image
-              src={completed ? completedIconSrc : bubbleIconSrc}
+              src={withBasePath(completed ? completedIconSrc : bubbleIconSrc)}
               alt=""
               width={18}
               height={18}
