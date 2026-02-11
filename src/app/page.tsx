@@ -42,6 +42,21 @@ export default function Home() {
             </Link>
           </div>
         </section>
+
+        <section className="space-y-4">
+          <h2 className="text-2xl font-semibold">测试</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Link
+              href="/components/dialoguethinking/test"
+              className="rounded-lg border p-6 transition hover:bg-muted"
+            >
+              <div className="text-base font-medium">Agent 思考输出</div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                对话界面中的思考过程组件，支持流式 A（字符流）与流式 B（按行模糊→清晰）两种样式对比。
+              </p>
+            </Link>
+          </div>
+        </section>
       </main>
     </div>
   );
