@@ -233,7 +233,7 @@ function splitTextIntoMeasuredLines(text: string, maxWidth: number): string[] {
          type="button"
         onClick={() => setExpanded((v) => !v)}
          className={cn(
-          "group flex max-w-(--bubble-max-width) items-center gap-3 rounded-[4px_20px_20px_20px] bg-transparent px-5 py-2 text-left transition-colors hover:bg-[rgba(73,90,122,0.03)]"
+          "group flex max-w-(--bubble-max-width) items-center gap-1 rounded-[4px_20px_20px_20px] bg-transparent px-5 py-2 text-left transition-colors hover:bg-[rgba(73,90,122,0.03)]"
          )}
         style={
           {
@@ -303,7 +303,11 @@ function splitTextIntoMeasuredLines(text: string, maxWidth: number): string[] {
           className={cn(
             "ml-auto inline-flex h-5 w-5 items-center justify-center transition-all duration-200",
             arrowTextColor,
-            expanded ? "rotate-180 opacity-100" : "rotate-0 opacity-0 group-hover:opacity-100"
+            expanded
+              ? "rotate-180 opacity-100"
+              : completed
+                ? "rotate-0 opacity-100"
+                : "rotate-0 opacity-0 group-hover:opacity-100"
           )}
           aria-hidden
         >
