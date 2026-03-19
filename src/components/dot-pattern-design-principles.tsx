@@ -368,9 +368,7 @@ function Chapter6() {
           <div className="aspect-2/1 bg-white relative border-b">
             <svg className="absolute inset-0 h-full w-full fill-zinc-800/15">
               <pattern id="p-stagger" width="20" height="40" patternUnits="userSpaceOnUse">
-                <circle cx="5" cy="10" r="1.2" />
-                <circle cx="15" cy="10" r="1.2" />
-                <circle cx="10" cy="30" r="1.2" />
+                <circle cx="10" cy="10" r="1.2" />
                 <circle cx="0" cy="30" r="1.2" />
                 <circle cx="20" cy="30" r="1.2" />
               </pattern>
@@ -425,6 +423,26 @@ function Chapter6() {
   );
 }
 
+function FadeDemo({ id, label, maskStyle, sublabel }: { id: string; label: string; maskStyle?: React.CSSProperties; sublabel: string }) {
+  return (
+    <div className="space-y-2 text-center">
+      <div className="aspect-3/2 w-full rounded-md border border-zinc-200 relative overflow-hidden bg-white">
+        <svg
+          className="absolute inset-0 h-full w-full fill-zinc-800/30"
+          style={maskStyle}
+        >
+          <pattern id={`p-fade-${id}`} width="14" height="14" patternUnits="userSpaceOnUse">
+            <circle cx="7" cy="7" r="1" />
+          </pattern>
+          <rect width="100%" height="100%" fill={`url(#p-fade-${id})`} />
+        </svg>
+      </div>
+      <p className="text-xs font-medium">{label}</p>
+      <p className="text-[10px] text-muted-foreground">{sublabel}</p>
+    </div>
+  );
+}
+
 function Chapter7() {
   return (
     <section className="space-y-6">
@@ -432,24 +450,69 @@ function Chapter7() {
       <p className="text-muted-foreground leading-relaxed max-w-prose">
         点阵在容器边缘的处理方式决定了整体的精致度。生硬的截断会让纹理"撞"到模块描边，而渐隐（Mask）可以让过渡自然柔和。
       </p>
+
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+        <FadeDemo
+          id="none"
+          label="无渐隐"
+          sublabel="边缘生硬截断"
+        />
+        <FadeDemo
+          id="weak"
+          label="Weak"
+          sublabel="中心→最远角"
+          maskStyle={{
+            WebkitMaskImage: "radial-gradient(circle farthest-corner at 50% 50%, black 0%, black 70%, transparent 100%)",
+            maskImage: "radial-gradient(circle farthest-corner at 50% 50%, black 0%, black 70%, transparent 100%)",
+          }}
+        />
+        <FadeDemo
+          id="medium"
+          label="Medium"
+          sublabel="中心→最远边"
+          maskStyle={{
+            WebkitMaskImage: "radial-gradient(circle farthest-side at 50% 50%, black 0%, black 50%, transparent 100%)",
+            maskImage: "radial-gradient(circle farthest-side at 50% 50%, black 0%, black 50%, transparent 100%)",
+          }}
+        />
+        <FadeDemo
+          id="strong"
+          label="Strong"
+          sublabel="中心→最近边"
+          maskStyle={{
+            WebkitMaskImage: "radial-gradient(circle closest-side at 50% 50%, black 0%, black 30%, transparent 100%)",
+            maskImage: "radial-gradient(circle closest-side at 50% 50%, black 0%, black 30%, transparent 100%)",
+          }}
+        />
+        <FadeDemo
+          id="invert"
+          label="Invert"
+          sublabel="反转：边缘清晰，中心消失"
+          maskStyle={{
+            WebkitMaskImage: "radial-gradient(circle closest-side at 50% 50%, transparent 0%, transparent 30%, black 100%)",
+            maskImage: "radial-gradient(circle closest-side at 50% 50%, transparent 0%, transparent 30%, black 100%)",
+          }}
+        />
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-3">
           <h4 className="font-medium text-sm">径向渐隐 Radial Mask</h4>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            使用 CSS <code className="text-xs bg-muted px-1 rounded">mask-image</code> 让点阵靠近边缘时逐渐淡出。本组件提供三档强度控制：
+            使用 CSS <code className="text-xs bg-muted px-1 rounded">mask-image</code> 让点阵靠近边缘时逐渐淡出。三档强度控制了渐变的"消失点"位置，在不同容器宽高比下差异更明显。
           </p>
           <ul className="text-xs text-muted-foreground space-y-1">
             <li className="flex gap-2">
               <span className="font-medium text-foreground w-16 shrink-0">Weak</span>
-              中心到最远角（farthest-corner）渐变，保留最大可视区域
+              farthest-corner：消失点在最远角，保留最大可视面积
             </li>
             <li className="flex gap-2">
               <span className="font-medium text-foreground w-16 shrink-0">Medium</span>
-              中心到最远边（farthest-side）渐变，边缘柔和过渡
+              farthest-side：消失点在最远边，四角先消失
             </li>
             <li className="flex gap-2">
               <span className="font-medium text-foreground w-16 shrink-0">Strong</span>
-              中心到最近边（closest-side）渐变，聚焦中心区域
+              closest-side：消失点在最近边，聚焦中心小范围
             </li>
           </ul>
         </div>
@@ -459,7 +522,7 @@ function Chapter7() {
             点阵提供的纹理区分度通常已经足够。使用点阵背景后，可以弱化或取消模块投影（Box Shadow），仅保留 1px 浅色描边（如 <code className="text-xs bg-muted px-1 rounded">#000 / 0.08</code>），画面会更干净。
           </p>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            反转蒙版（Invert Mask）可以实现"中心掏空、边缘保留"的效果——边缘清晰，中心逐渐消失。适合在需要中央内容绝对清晰的场景中使用。
+            反转蒙版（Invert Mask）实现"中心掏空、边缘保留"——适合中央内容需要绝对清晰、四周用纹理做装饰的场景。
           </p>
         </div>
       </div>
