@@ -191,7 +191,7 @@ function Chapter2() {
       </div>
       <div className="rounded-lg border border-zinc-100 bg-zinc-50/40 overflow-hidden flex items-center justify-center py-4">
         <img
-          src="/mtl/p1.png"
+          src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/mtl/p1.png`}
           alt="点阵背景视觉透视示意图"
           className="max-h-64 w-auto object-contain select-none"
           draggable={false}
