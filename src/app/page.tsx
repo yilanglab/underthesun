@@ -7,25 +7,8 @@ export default function Home() {
         <section className="space-y-6">
           <h1 className="text-5xl font-semibold tracking-tight">UnderTheSun</h1>
           <p className="max-w-2xl text-lg text-muted-foreground">
-            基于 Next.js + Shadcn UI 的组件库，提供可复制即用的高质量 UI
-            组件与交互动效。
+            There's nothing new under the sun.
           </p>
-          <div className="flex gap-3">
-            <Link
-              className="inline-flex h-10 items-center justify-center rounded-md bg-foreground px-4 text-sm font-medium text-background hover:bg-foreground/90"
-              href="/components/dot-pattern"
-            >
-              开始使用
-            </Link>
-            <a
-              className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted"
-              href="https://ui.shadcn.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Shadcn UI
-            </a>
-          </div>
         </section>
 
         <section className="space-y-4">

@@ -11,13 +11,13 @@ const TOTAL_SLIDES = 8;
 export function DotPatternDesignPrinciples() {
   const [presenting, setPresenting] = useState(false);
   const [slide, setSlide] = useState(0);
-  const [zoom, setZoom] = useState(100);
+  const [zoom, setZoom] = useState(150);
 
   const prev = useCallback(() => setSlide((s) => Math.max(0, s - 1)), []);
   const next = useCallback(() => setSlide((s) => Math.min(TOTAL_SLIDES - 1, s + 1)), []);
   const zoomIn = useCallback(() => setZoom((z) => Math.min(200, z + 10)), []);
   const zoomOut = useCallback(() => setZoom((z) => Math.max(50, z - 10)), []);
-  const close = useCallback(() => { setPresenting(false); setZoom(100); }, []);
+  const close = useCallback(() => { setPresenting(false); setZoom(150); }, []);
 
   useEffect(() => {
     if (!presenting) return;
@@ -41,6 +41,16 @@ export function DotPatternDesignPrinciples() {
     return () => { document.body.style.overflow = ""; };
   }, [presenting]);
 
+  useEffect(() => {
+    const handleOpenPresentation = () => {
+      setSlide(0);
+      setZoom(150);
+      setPresenting(true);
+    };
+    window.addEventListener('open-design-presentation', handleOpenPresentation);
+    return () => window.removeEventListener('open-design-presentation', handleOpenPresentation);
+  }, []);
+
   const chapters: ReactNode[] = [
     <Chapter1 key={1} />,
     <Chapter2 key={2} />,
@@ -55,17 +65,6 @@ export function DotPatternDesignPrinciples() {
   return (
     <>
       <div className="grid gap-16">
-        <div className="flex justify-end">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2 text-xs"
-            onClick={() => { setSlide(0); setZoom(100); setPresenting(true); }}
-          >
-            <Maximize2 className="h-3.5 w-3.5" />
-            全屏演示
-          </Button>
-        </div>
         {chapters}
       </div>
 
@@ -141,10 +140,10 @@ function Chapter1() {
     <section className="space-y-6">
       <ChapterHeader index={1} title="一个常见的设计问题" />
       <p className="text-muted-foreground leading-relaxed max-w-prose">
-        在白色为主的 UI 界面中，我们常常需要在白底上区分不同的模块区域。最直觉的做法是使用浅灰填充——但它会带来一种微妙的"沉淀感"，让界面变得灰蒙蒙的。
+        在白色为主的 UI 界面中，我们常常需要在白底上区分不同的模块区域。最直觉的做法是浅灰填充——但灰色会让整个界面沉下去。
       </p>
       <p className="text-muted-foreground leading-relaxed max-w-prose">
-        点阵图案提供了一种截然不同的思路：<strong className="text-foreground">用"频率"替代"深浅"来塑造层级</strong>。它更符合现代 UI 追求的"数字原生"质感。
+        点阵是另一种思路：<strong className="text-foreground">用"频率"替代"深浅"来塑造层级</strong>。
       </p>
       <div className="rounded-lg border bg-zinc-50/50 p-6">
         <div className="grid grid-cols-2 gap-8 max-w-md mx-auto">
@@ -177,17 +176,17 @@ function Chapter2() {
         <PrincipleCard
           title="负空间的力量"
           keyword="Negative Space"
-          description="点阵保留了大量原始白底。人眼会自动将散点组合为一个整体区域（格式塔），但大脑能感知到白底在“透气”。这种透光性产生了轻盈感。浅灰填充则改变了所有像素，形成一块密闭的视觉质量。"
+          description="点阵保留了大量白底。人眼把散点看成一个整体（格式塔），但大脑能感觉到白底还在“透气”。浅灰填充改变了所有像素，透不过气。"
         />
         <PrincipleCard
           title="空间混色效应"
           keyword="Spatial Mixing"
-          description="微观上，深色点与白底形成高对比；宏观上，大脑将其平滑感知为一种“纹理灰”。这种高频纹理比低频的平涂灰色更能勾勒出模块边界——在不增加色块厚重感的前提下，清晰地界定区域。"
+          description="深色点和白底在微观上形成高对比，宏观上大脑把它们混合成一种“纹理灰”。这种高频纹理比平涂灰色更能勾勒模块边界，同时不会让画面变重。"
         />
         <PrincipleCard
           title="避免“脏”感"
           keyword="Color Purity"
-          description="浅灰色（如 #F5F5F5）在低质量或 OLED 显示器上容易发灰、发脏。点阵使用纯黑+低透明度，让底层白色背光穿透，维持了画面的高亮度和色彩纯净度，有效避免“抹布屏”效应。"
+          description="浅灰色（如 #F5F5F5）在低质量屏或 OLED 上容易发灰发脏。点阵用纯黑+低透明度，白色背光能穿透过来，画面亮度和色彩纯净度都不受影响。"
         />
       </div>
       <div className="rounded-lg border border-zinc-100 bg-zinc-50/40 overflow-hidden flex items-center justify-center py-4">
@@ -199,7 +198,7 @@ function Chapter2() {
         />
       </div>
       <blockquote className="border-l-2 border-zinc-300 pl-4 text-sm text-muted-foreground italic">
-        点阵是"高频信号"，覆盖率极低（1-3%），在视网膜上产生的总能量极小，对注意力的占用远低于"低频"的浅灰色块。
+        覆盖率只有 1-3% 的点阵是"高频信号"，在视网膜上产生的能量极小，远不如一整块浅灰色抢眼。
       </blockquote>
     </section>
   );
@@ -210,7 +209,7 @@ function Chapter3() {
     <section className="space-y-6">
       <ChapterHeader index={3} title="量化控制：覆盖率模型" />
       <p className="text-muted-foreground leading-relaxed max-w-prose">
-        如何精确控制点阵的"深浅"？关键是<strong className="text-foreground">覆盖率（Coverage）</strong>——点面积占单元格面积的比值。它量化了背景对视觉的占用程度。
+        点阵"深浅"的精确控制靠<strong className="text-foreground">覆盖率（Coverage）</strong>——点面积占单元格面积的比值。
       </p>
       <div className="rounded-lg border bg-zinc-50/50 p-6 space-y-6">
         <div className="flex items-center gap-4 flex-wrap">
@@ -228,7 +227,7 @@ function Chapter3() {
             <div className="h-full rounded-full bg-zinc-800" style={{ width: "3%" }} />
           </div>
           <p className="text-xs text-muted-foreground">
-            这是"质感存在但不喧宾夺主"的核心阈值。低于 1% 几乎不可见，高于 3% 开始产生干扰。
+            低于 1% 几乎看不见，高于 3% 开始抢前景的注意力。1-3% 是"有质感但不喧宾夺主"的区间。
           </p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -294,14 +293,14 @@ function Chapter5() {
     <section className="space-y-6">
       <ChapterHeader index={4} title="形态语言：形状如何改变“性格”" />
       <p className="text-muted-foreground leading-relaxed max-w-prose">
-        形状的选择不只是美学偏好——它会从根本上改变界面传达的<strong className="text-foreground">情绪</strong>和<strong className="text-foreground">引导性</strong>。每种形状都有自己的"视觉性格"。
+        形状不只是好不好看的问题——换一种形状，界面的<strong className="text-foreground">情绪</strong>和<strong className="text-foreground">引导性</strong>就完全不同。
       </p>
       <div className="grid gap-4 sm:grid-cols-3">
         <ShapeCard
           title="圆形 Circle"
           personality="柔和 · 轻盈 · 自由"
           scene="创意画布、内容展示、品牌官网"
-          detail="无方向性，各向同性最强。人眼不会从圆点中读取出“对齐线”，因此对前景内容的干扰最小。"
+          detail="没有方向性，各向同性最强。人眼不会从圆点中读出“对齐线”，对前景干扰最小。"
           visual={
             <svg className="h-full w-full fill-zinc-800/20">
               <pattern id="p-shape-circle" width="16" height="16" patternUnits="userSpaceOnUse">
@@ -315,7 +314,7 @@ function Chapter5() {
           title="十字 Cross"
           personality="工业 · 精密 · 定位"
           scene="精密工具、吸附坐标、工程界面"
-          detail="提供最强的中心定位感。四个方向的“边缘能量”比圆点更高，能精确暗示交汇坐标，适合做吸附的视觉引导。"
+          detail="中心定位感最强。四条臂的“边缘能量”比圆点高，暗示交汇坐标，适合吸附引导。"
           visual={
             <svg className="h-full w-full stroke-zinc-800/20" strokeWidth="0.6">
               <pattern id="p-shape-cross" width="16" height="16" patternUnits="userSpaceOnUse">
@@ -330,7 +329,7 @@ function Chapter5() {
           title="方形 Square"
           personality="像素 · 硬朗 · 数字"
           scene="代码编辑器、金融后台、数据面板"
-          detail="方形具有明确的水平/垂直边缘，会产生更强的“网格暗示”。在需要灵感迸发的自由画布中显得过于死板，但在工程场景中传达精密感。"
+          detail="水平和垂直边缘明确，“网格暗示”最强。放在自由画布里偏死板，但工程场景正合适。"
           visual={
             <svg className="h-full w-full fill-zinc-800/20">
               <pattern id="p-shape-square" width="16" height="16" patternUnits="userSpaceOnUse">
@@ -342,7 +341,7 @@ function Chapter5() {
         />
       </div>
       <div className="rounded-md border border-amber-200 bg-amber-50/50 px-4 py-3 text-sm text-amber-900">
-        <strong>注意：</strong>不对称异形（如三角形）会产生强烈的方向性暗示，破坏背景纹理应有的"各向同性（Isotropic）"，慎用。
+        <strong>注意：</strong>三角形等不对称异形会产生强方向性，破坏背景该有的各向同性（Isotropic），慎用。
       </div>
     </section>
   );
@@ -353,7 +352,7 @@ function Chapter6() {
     <section className="space-y-6">
       <ChapterHeader index={5} title="排列模式：秩序感 vs 流动感" />
       <p className="text-muted-foreground leading-relaxed max-w-prose">
-        同样的点，排列方式的改变会瞬间切换设计的"语境"。这是点阵设计中最容易被忽视、但影响巨大的一个维度。
+        同样的点，换一种排法，设计的"语境"立刻变了。
       </p>
       <div className="grid gap-6 md:grid-cols-2">
         <div className="rounded-lg border overflow-hidden">
@@ -368,7 +367,7 @@ function Chapter6() {
           <div className="p-4 space-y-2">
             <h4 className="font-medium text-sm">正交排列 Orthogonal</h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              产生明确的水平/垂直导向线，传达<strong>秩序、精密、逻辑严密</strong>的气质。眼睛会自动连接垂直和水平方向的点，形成隐形的"棋盘格线"。适合 SaaS 面板、代码编辑器、数据后台等效率工具。
+              水平和垂直方向有明确的导向线，眼睛会自动连点成"棋盘格线"。传达<strong>秩序和精密</strong>。SaaS 面板、代码编辑器、数据后台用得多。
             </p>
           </div>
         </div>
@@ -386,7 +385,7 @@ function Chapter6() {
           <div className="p-4 space-y-2">
             <h4 className="font-medium text-sm">交错排列 Staggered</h4>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              每行横移半个间距，点与点形成等边三角形关系。打破了垂直方向的直线连接，将视觉引导分散到 60° 斜向。画面显得更加<strong>柔和、有机、流动</strong>，像一层"织物"或"皮肤"。密度分布也更均匀（六角密排原理）。
+              每行横移半个间距，点与点之间形成等边三角形。垂直方向的直线被打破，视线分散到 60° 斜向，画面<strong>更柔和也更有机</strong>，像织物的纹理。密度分布也更均匀（六角密排原理）。
             </p>
           </div>
         </div>
@@ -425,7 +424,7 @@ function Chapter6() {
         </table>
       </div>
       <blockquote className="border-l-2 border-zinc-300 pl-4 text-sm text-muted-foreground italic">
-        交错排列更"高级"，但仅作为装饰性纹理存在——不要尝试让 UI 元素对齐交错点阵，它不承担辅助对齐功能。
+        交错排列更"高级"，但它只做装饰——别指望让 UI 元素对齐交错点阵。
       </blockquote>
     </section>
   );
@@ -456,7 +455,7 @@ function Chapter7() {
     <section className="space-y-6">
       <ChapterHeader index={6} title="边缘处理：渐隐与过渡" />
       <p className="text-muted-foreground leading-relaxed max-w-prose">
-        点阵在容器边缘的处理方式决定了整体的精致度。生硬的截断会让纹理"撞"到模块描边，而渐隐（Mask）可以让过渡自然柔和。
+        边缘怎么收尾，差别很大。生硬截断让纹理"撞"到描边上，渐隐（Mask）则让过渡柔和得多。
       </p>
 
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
@@ -507,7 +506,7 @@ function Chapter7() {
         <div className="space-y-3">
           <h4 className="font-medium text-sm">径向渐隐 Radial Mask</h4>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            使用 CSS <code className="text-xs bg-muted px-1 rounded">mask-image</code> 让点阵靠近边缘时逐渐淡出。三档强度控制了渐变的"消失点"位置，在不同容器宽高比下差异更明显。
+            用 CSS <code className="text-xs bg-muted px-1 rounded">mask-image</code> 让点阵靠近边缘时淡出。三档强度对应不同的"消失点"位置，容器越扁长，差异越明显。
           </p>
           <ul className="text-xs text-muted-foreground space-y-1">
             <li className="flex gap-2">
@@ -527,10 +526,10 @@ function Chapter7() {
         <div className="space-y-3">
           <h4 className="font-medium text-sm">与描边的配合</h4>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            点阵提供的纹理区分度通常已经足够。使用点阵背景后，可以弱化或取消模块投影（Box Shadow），仅保留 1px 浅色描边（如 <code className="text-xs bg-muted px-1 rounded">#000 / 0.08</code>），画面会更干净。
+            有了点阵纹理，模块投影（Box Shadow）通常可以去掉，只留 1px 浅色描边（如 <code className="text-xs bg-muted px-1 rounded">#000 / 0.08</code>），画面干净很多。
           </p>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            反转蒙版（Invert Mask）实现"中心掏空、边缘保留"——适合中央内容需要绝对清晰、四周用纹理做装饰的场景。
+            反转蒙版（Invert Mask）让中心掏空、边缘保留——中央放内容，四周用纹理做装饰。
           </p>
         </div>
       </div>
@@ -562,7 +561,7 @@ function ChapterOpenSource() {
     <section className="space-y-6">
       <ChapterHeader index={7} title="开源组件库" />
       <p className="text-muted-foreground leading-relaxed max-w-prose">
-        以下是社区中提供点阵/网格背景组件的开源项目，各有侧重。它们也是本组件在 API 设计和效果实现上的重要参考。
+        社区里已有不少点阵/网格背景组件，以下几个是本组件 API 设计时的主要参考。
       </p>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <LibCard

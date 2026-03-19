@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Maximize2, Copy, Check } from "lucide-react";
 
 import { CodeBlockClient } from "@/components/code-block-client";
 import { CollapsibleCodeBlock } from "@/components/collapsible-code-block";
@@ -12,6 +13,7 @@ import {
 } from "@/components/dot-pattern-params-panel";
 import { DotPatternPlaygroundTabs } from "@/components/dot-pattern-playground-tabs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 
 type DotPatternClientProps = {
   dotPatternSource: string;
@@ -24,6 +26,63 @@ type DotPatternClientProps = {
   };
 };
 
+function DesignTabButtons() {
+  const [copied, setCopied] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+
+  const handleCopyAgentGuide = async () => {
+    const url = `${window.location.origin}${window.location.pathname}/agent-guide`;
+    const copyText = `${url}\n\n理解学习此组件设计原则`;
+    await navigator.clipboard.writeText(copyText);
+    setCopied(true);
+    setShowToast(true);
+    setTimeout(() => {
+      setCopied(false);
+      setShowToast(false);
+    }, 3000);
+  };
+
+  return (
+    <>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2 text-xs"
+          onClick={handleCopyAgentGuide}
+        >
+          {copied ? (
+            <Check className="h-3.5 w-3.5" />
+          ) : (
+            <Copy className="h-3.5 w-3.5" />
+          )}
+          Agent 指南
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2 text-xs"
+          onClick={() => {
+            const event = new CustomEvent('open-design-presentation');
+            window.dispatchEvent(event);
+          }}
+        >
+          <Maximize2 className="h-3.5 w-3.5" />
+          全屏演示
+        </Button>
+      </div>
+      
+      {showToast && (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="rounded-lg border bg-background px-6 py-4 shadow-lg">
+            <p className="text-sm font-medium">已复制指南链接，可发送给贵agent学习本设计原则</p>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 export function DotPatternClient({
   dotPatternSource,
   utilsSource,
@@ -31,6 +90,7 @@ export function DotPatternClient({
 }: DotPatternClientProps) {
   const [params, setParams] = useState<DotPatternParams>(DEFAULT_PARAMS);
   const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [currentTab, setCurrentTab] = useState("usage");
 
   const handleParamChange = <K extends keyof DotPatternParams>(
     key: K,
@@ -52,11 +112,19 @@ export function DotPatternClient({
         onReset={handleReset}
       />
 
-      <Tabs defaultValue="usage" className="space-y-8">
-        <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
-          <TabsTrigger value="usage">使用 Usage</TabsTrigger>
-          <TabsTrigger value="design">设计 Principles</TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="usage" className="space-y-8" onValueChange={(value) => {
+        setCurrentTab(value);
+        if (value === 'design' && isPanelOpen) {
+          setIsPanelOpen(false);
+        }
+      }}>
+        <div className="flex items-center justify-between gap-4">
+          <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
+            <TabsTrigger value="usage">使用 Usage</TabsTrigger>
+            <TabsTrigger value="design">设计 Principles</TabsTrigger>
+          </TabsList>
+          {currentTab === 'design' && <DesignTabButtons />}
+        </div>
 
         <TabsContent value="usage" className="space-y-12">
           <DotPatternPlaygroundTabs
