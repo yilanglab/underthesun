@@ -6,7 +6,7 @@ import { Maximize2, Minimize2, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, X } f
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-const TOTAL_SLIDES = 10;
+const TOTAL_SLIDES = 8;
 
 export function DotPatternDesignPrinciples() {
   const [presenting, setPresenting] = useState(false);
@@ -45,13 +45,11 @@ export function DotPatternDesignPrinciples() {
     <Chapter1 key={1} />,
     <Chapter2 key={2} />,
     <Chapter3 key={3} />,
-    <Chapter4 key={4} />,
-    <Chapter5 key={5} />,
-    <Chapter6 key={6} />,
-    <Chapter7 key={7} />,
-    <Chapter8 key={8} />,
-    <Chapter9 key={9} />,
-    <References key={10} />,
+    <Chapter5 key={4} />,
+    <Chapter6 key={5} />,
+    <Chapter7 key={6} />,
+    <ChapterOpenSource key={7} />,
+    <References key={8} />,
   ];
 
   return (
@@ -192,6 +190,14 @@ function Chapter2() {
           description="浅灰色（如 #F5F5F5）在低质量或 OLED 显示器上容易发灰、发脏。点阵使用纯黑+低透明度，让底层白色背光穿透，维持了画面的高亮度和色彩纯净度，有效避免“抹布屏”效应。"
         />
       </div>
+      <div className="rounded-lg border border-zinc-100 bg-zinc-50/40 overflow-hidden flex items-center justify-center py-4">
+        <img
+          src="/mtl/p1.png"
+          alt="点阵背景视觉透视示意图"
+          className="max-h-64 w-auto object-contain select-none"
+          draggable={false}
+        />
+      </div>
       <blockquote className="border-l-2 border-zinc-300 pl-4 text-sm text-muted-foreground italic">
         点阵是"高频信号"，覆盖率极低（1-3%），在视网膜上产生的总能量极小，对注意力的占用远低于"低频"的浅灰色块。
       </blockquote>
@@ -233,49 +239,51 @@ function Chapter3() {
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-3 text-sm">
-        <div className="rounded-md border p-4 space-y-2">
-          <div className="font-medium">示例 A：精致呼吸感</div>
-          <div className="text-muted-foreground">r=0.5px, g=24px → Coverage ≈ 0.14%</div>
-          <div className="text-xs text-muted-foreground">极低覆盖率，适合大面积背景</div>
+        <div className="rounded-md border overflow-hidden">
+          <div className="aspect-3/2 bg-white relative border-b">
+            <svg className="absolute inset-0 h-full w-full fill-zinc-800/15">
+              <pattern id="p-cov-a" width="24" height="24" patternUnits="userSpaceOnUse">
+                <circle cx="12" cy="12" r="1" />
+              </pattern>
+              <rect width="100%" height="100%" fill="url(#p-cov-a)" />
+            </svg>
+          </div>
+          <div className="p-3 space-y-1">
+            <div className="font-medium">示例 A：精致呼吸感</div>
+            <div className="text-muted-foreground font-mono text-xs">r=0.5px · g=24px · Coverage ≈ 0.14%</div>
+            <div className="text-xs text-muted-foreground">极低覆盖率，适合大面积背景</div>
+          </div>
         </div>
-        <div className="rounded-md border p-4 space-y-2">
-          <div className="font-medium">示例 B：标准纹理</div>
-          <div className="text-muted-foreground">r=0.5px, g=16px → Coverage ≈ 0.31%</div>
-          <div className="text-xs text-muted-foreground">常规点阵，普适性最强</div>
+        <div className="rounded-md border overflow-hidden">
+          <div className="aspect-3/2 bg-white relative border-b">
+            <svg className="absolute inset-0 h-full w-full fill-zinc-800/15">
+              <pattern id="p-cov-b" width="16" height="16" patternUnits="userSpaceOnUse">
+                <circle cx="8" cy="8" r="1" />
+              </pattern>
+              <rect width="100%" height="100%" fill="url(#p-cov-b)" />
+            </svg>
+          </div>
+          <div className="p-3 space-y-1">
+            <div className="font-medium">示例 B：标准纹理</div>
+            <div className="text-muted-foreground font-mono text-xs">r=0.5px · g=16px · Coverage ≈ 0.31%</div>
+            <div className="text-xs text-muted-foreground">常规点阵，普适性最强</div>
+          </div>
         </div>
-        <div className="rounded-md border p-4 space-y-2">
-          <div className="font-medium">示例 C：明显质感</div>
-          <div className="text-muted-foreground">r=1px, g=12px → Coverage ≈ 2.18%</div>
-          <div className="text-xs text-muted-foreground">视觉权重明显，适合强调区域</div>
+        <div className="rounded-md border overflow-hidden">
+          <div className="aspect-3/2 bg-white relative border-b">
+            <svg className="absolute inset-0 h-full w-full fill-zinc-800/15">
+              <pattern id="p-cov-c" width="12" height="12" patternUnits="userSpaceOnUse">
+                <circle cx="6" cy="6" r="1.5" />
+              </pattern>
+              <rect width="100%" height="100%" fill="url(#p-cov-c)" />
+            </svg>
+          </div>
+          <div className="p-3 space-y-1">
+            <div className="font-medium">示例 C：明显质感</div>
+            <div className="text-muted-foreground font-mono text-xs">r=1px · g=12px · Coverage ≈ 2.18%</div>
+            <div className="text-xs text-muted-foreground">视觉权重明显，适合强调区域</div>
+          </div>
         </div>
-      </div>
-    </section>
-  );
-}
-
-function Chapter4() {
-  return (
-    <section className="space-y-6">
-      <ChapterHeader index={4} title="物理显示：为什么用黑色+透明度？" />
-      <p className="text-muted-foreground leading-relaxed max-w-prose">
-        参数推荐不是凭空而来。它们结合了屏幕渲染物理特性和视觉心理学的交叉验证。
-      </p>
-      <div className="grid gap-6 md:grid-cols-3">
-        <PrincipleCard
-          title="像素对齐"
-          keyword="Pixel Snapping"
-          description="1px 是渲染最清晰、边缘最锐利的基准单位。0.5px 在非 Retina 屏会严重模糊（反走样）。即使在 2x/3x 屏上，1px 依然是最稳定的渲染单位。"
-        />
-        <PrincipleCard
-          title="#000 + Opacity 的物理优势"
-          keyword="Backlight Transparency"
-          description="使用灰色值（如 #F5F5F5），显示器通过子像素 RGB 组合该颜色。使用纯黑+低透明度，则是让纯白背景光穿透，色彩更纯净。在 OLED 屏上尤为明显。"
-        />
-        <PrincipleCard
-          title="栅格一致性"
-          keyword="8pt Grid System"
-          description="间距选用 16/24/32px 等 8 的倍数，与布局的 Padding/Margin 形成隐性对齐。这不是随意选择——它让点阵在潜意识中增强整体画面的秩序感。"
-        />
       </div>
     </section>
   );
@@ -284,7 +292,7 @@ function Chapter4() {
 function Chapter5() {
   return (
     <section className="space-y-6">
-      <ChapterHeader index={5} title="形态语言：形状如何改变“性格”" />
+      <ChapterHeader index={4} title="形态语言：形状如何改变“性格”" />
       <p className="text-muted-foreground leading-relaxed max-w-prose">
         形状的选择不只是美学偏好——它会从根本上改变界面传达的<strong className="text-foreground">情绪</strong>和<strong className="text-foreground">引导性</strong>。每种形状都有自己的"视觉性格"。
       </p>
@@ -343,7 +351,7 @@ function Chapter5() {
 function Chapter6() {
   return (
     <section className="space-y-6">
-      <ChapterHeader index={6} title="排列模式：秩序感 vs 流动感" />
+      <ChapterHeader index={5} title="排列模式：秩序感 vs 流动感" />
       <p className="text-muted-foreground leading-relaxed max-w-prose">
         同样的点，排列方式的改变会瞬间切换设计的"语境"。这是点阵设计中最容易被忽视、但影响巨大的一个维度。
       </p>
@@ -446,7 +454,7 @@ function FadeDemo({ id, label, maskStyle, sublabel }: { id: string; label: strin
 function Chapter7() {
   return (
     <section className="space-y-6">
-      <ChapterHeader index={7} title="边缘处理：渐隐与过渡" />
+      <ChapterHeader index={6} title="边缘处理：渐隐与过渡" />
       <p className="text-muted-foreground leading-relaxed max-w-prose">
         点阵在容器边缘的处理方式决定了整体的精致度。生硬的截断会让纹理"撞"到模块描边，而渐隐（Mask）可以让过渡自然柔和。
       </p>
@@ -530,129 +538,58 @@ function Chapter7() {
   );
 }
 
-function Chapter8() {
+function LibCard({ name, description, url }: { name: string; description: string; url: string }) {
   return (
-    <section className="space-y-6">
-      <ChapterHeader index={8} title="缩放场景：自由画布中的挑战" />
-      <p className="text-muted-foreground leading-relaxed max-w-prose">
-        在 Figma、Miro 等无限画布产品中，背景纹理会随缩放级别变化。如果处理不当，会产生三个核心问题。
-      </p>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <PrincipleCard
-          title="莫尔条纹"
-          keyword="Moiré Effect"
-          description="当点距接近显示器物理像素间距时，采样频率失调会产生波纹、阴影等视觉噪音，引起眩晕。"
-        />
-        <PrincipleCard
-          title="视觉权重失控"
-          keyword="Visual Mass Drift"
-          description="放大时，精致的“质感点”变成巨大的“圆饼”；缩小时，点变得斑驳或消失，失去空间坐标感。"
-        />
-        <PrincipleCard
-          title="渲染性能"
-          keyword="Performance"
-          description="大量独立 SVG 或 DOM 节点在缩放时的重绘会导致掉帧。需要做上限保护或降级策略。"
-        />
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group rounded-lg border p-4 space-y-2 transition-colors hover:bg-zinc-50/80 hover:border-zinc-300 block"
+    >
+      <div className="flex items-center justify-between">
+        <h4 className="font-medium text-sm group-hover:text-foreground">{name}</h4>
+        <svg className="h-3.5 w-3.5 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M4.5 11.5L11.5 4.5M11.5 4.5H6M11.5 4.5V10" />
+        </svg>
       </div>
-      <div className="overflow-hidden rounded-lg border">
-        <div className="bg-muted px-4 py-2 text-sm font-medium">
-          推荐策略：分级细节（LOD）
-        </div>
-        <table className="w-full text-left text-sm">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="px-4 py-2 font-medium">缩放区间</th>
-              <th className="px-4 py-2 font-medium">表现形式</th>
-              <th className="px-4 py-2 font-medium">策略</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-t">
-              <td className="px-4 py-2 font-mono text-xs">&lt; 20%</td>
-              <td className="px-4 py-2">无纹理 / 纯色</td>
-              <td className="px-4 py-2 text-muted-foreground">降噪，强调整体轮廓</td>
-            </tr>
-            <tr className="border-t">
-              <td className="px-4 py-2 font-mono text-xs">20% – 200%</td>
-              <td className="px-4 py-2">1px 点阵</td>
-              <td className="px-4 py-2 text-muted-foreground">保持物理 1px，间距随缩放</td>
-            </tr>
-            <tr className="border-t">
-              <td className="px-4 py-2 font-mono text-xs">&gt; 200%</td>
-              <td className="px-4 py-2">细十字线</td>
-              <td className="px-4 py-2 text-muted-foreground">提示用户进入高精度编辑</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <blockquote className="border-l-2 border-zinc-300 pl-4 text-sm text-muted-foreground italic">
-        核心原则：点不应随缩放而"肥胖"。始终保持屏幕物理尺寸恒定（如 1px 或 1.5px），是维持高级感的关键。
-      </blockquote>
-    </section>
+      <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
+    </a>
   );
 }
 
-function Chapter9() {
+function ChapterOpenSource() {
   return (
     <section className="space-y-6">
-      <ChapterHeader index={9} title="决策指南：如何选择？" />
+      <ChapterHeader index={7} title="开源组件库" />
       <p className="text-muted-foreground leading-relaxed max-w-prose">
-        没有"最好"的点阵配置——只有最匹配场景的配置。以下是基于设计目标的快速决策矩阵。
+        以下是社区中提供点阵/网格背景组件的开源项目，各有侧重。它们也是本组件在 API 设计和效果实现上的重要参考。
       </p>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-lg border p-5 space-y-3 bg-blue-50/30 border-blue-200/50">
-          <div className="text-sm font-medium">偏展示 / 内容阅读</div>
-          <div className="text-xs text-muted-foreground leading-relaxed">追求轻盈、不干扰阅读</div>
-          <div className="flex flex-wrap gap-1.5">
-            <Tag>圆形</Tag><Tag>交错排列</Tag><Tag>低透明度</Tag><Tag>边缘渐隐</Tag>
-          </div>
-        </div>
-        <div className="rounded-lg border p-5 space-y-3 bg-amber-50/30 border-amber-200/50">
-          <div className="text-sm font-medium">偏精密 / 工具导向</div>
-          <div className="text-xs text-muted-foreground leading-relaxed">强调对齐、坐标感、专业工具属性</div>
-          <div className="flex flex-wrap gap-1.5">
-            <Tag>十字 / 方形</Tag><Tag>正交排列</Tag><Tag>极低透明度</Tag>
-          </div>
-        </div>
-        <div className="rounded-lg border p-5 space-y-3 bg-emerald-50/30 border-emerald-200/50">
-          <div className="text-sm font-medium">自由画布场景</div>
-          <div className="text-xs text-muted-foreground leading-relaxed">需要适配缩放，保持恒定视觉权重</div>
-          <div className="flex flex-wrap gap-1.5">
-            <Tag>固定 1px</Tag><Tag>分级 LOD</Tag><Tag>非比例缩放</Tag>
-          </div>
-        </div>
-      </div>
-      <div className="overflow-hidden rounded-lg border">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-muted">
-            <tr>
-              <th className="px-4 py-2 font-medium">样式</th>
-              <th className="px-4 py-2 font-medium">视觉语言</th>
-              <th className="px-4 py-2 font-medium">核心功能</th>
-              <th className="px-4 py-2 font-medium">典型案例</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-t">
-              <td className="px-4 py-2 font-medium">点阵 Dots</td>
-              <td className="px-4 py-2">轻盈、透气、现代</td>
-              <td className="px-4 py-2 text-muted-foreground">区分模块，增加质感</td>
-              <td className="px-4 py-2 text-muted-foreground">Linear, Notion, Raycast</td>
-            </tr>
-            <tr className="border-t">
-              <td className="px-4 py-2 font-medium">十字 Cross</td>
-              <td className="px-4 py-2">精准、工业、点位</td>
-              <td className="px-4 py-2 text-muted-foreground">坐标定位，辅助吸附</td>
-              <td className="px-4 py-2 text-muted-foreground">Figma, Spline</td>
-            </tr>
-            <tr className="border-t">
-              <td className="px-4 py-2 font-medium">方格 Grid</td>
-              <td className="px-4 py-2">严谨、结构、空间</td>
-              <td className="px-4 py-2 text-muted-foreground">空间度量，逻辑组织</td>
-              <td className="px-4 py-2 text-muted-foreground">Blender, 流程图工具</td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <LibCard
+          name="Aceternity UI"
+          description="Grid and Dot Backgrounds — Next.js + Tailwind CSS 组件，支持明暗模式"
+          url="https://ui.aceternity.com/components/grid-and-dot-backgrounds"
+        />
+        <LibCard
+          name="Magic UI"
+          description="Dot Pattern — SVG 实现，Tailwind 全自定义，支持 Glow 效果"
+          url="https://magicui.design/docs/components/dot-pattern"
+        />
+        <LibCard
+          name="React Bits"
+          description="DotGrid — Canvas + GSAP 交互动态点阵，13 个可调参数"
+          url="https://www.reactbits.dev/"
+        />
+        <LibCard
+          name="Lightswind"
+          description="Grid Dot Backgrounds — 含渐出效果，支持亮/暗模式"
+          url="https://lightswind.com/components/grid-dot-backgrounds"
+        />
+        <LibCard
+          name="shadcn/ui Backgrounds"
+          description="40+ 动画背景组件合集，Canvas 渲染鼠标交互 Glow"
+          url="https://www.shadcn.io/background/dot-pattern"
+        />
       </div>
     </section>
   );
@@ -725,10 +662,3 @@ function ShapeCard({ title, personality, scene, detail, visual }: { title: strin
   );
 }
 
-function Tag({ children }: { children: ReactNode }) {
-  return (
-    <span className="inline-block rounded-full bg-zinc-100 px-2.5 py-0.5 text-[10px] font-medium text-zinc-600">
-      {children}
-    </span>
-  );
-}
