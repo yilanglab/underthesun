@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, ReactNode } from "react";
 import { Maximize2, Minimize2, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { getAssetPath } from "@/lib/base-path";
 import { Button } from "@/components/ui/button";
 
 const TOTAL_SLIDES = 8;
@@ -191,7 +192,7 @@ function Chapter2() {
       </div>
       <div className="rounded-lg border border-zinc-100 bg-zinc-50/40 overflow-hidden flex items-center justify-center py-4">
         <img
-          src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/mtl/p1.png`}
+          src={getAssetPath('mtl/p1.png')}
           alt="点阵背景视觉透视示意图"
           className="max-h-64 w-auto object-contain select-none"
           draggable={false}
