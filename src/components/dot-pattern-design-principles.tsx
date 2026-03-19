@@ -179,17 +179,17 @@ function Chapter2() {
         <PrincipleCard
           title="负空间的力量"
           keyword="Negative Space"
-          description="点阵保留了大量原始白底。人眼会自动将散点组合为一个整体区域（格式塔），但大脑能感知到白底在"透气"。这种透光性产生了轻盈感。浅灰填充则改变了所有像素，形成一块密闭的视觉质量。"
+          description="点阵保留了大量原始白底。人眼会自动将散点组合为一个整体区域（格式塔），但大脑能感知到白底在“透气”。这种透光性产生了轻盈感。浅灰填充则改变了所有像素，形成一块密闭的视觉质量。"
         />
         <PrincipleCard
           title="空间混色效应"
           keyword="Spatial Mixing"
-          description="微观上，深色点与白底形成高对比；宏观上，大脑将其平滑感知为一种"纹理灰"。这种高频纹理比低频的平涂灰色更能勾勒出模块边界——在不增加色块厚重感的前提下，清晰地界定区域。"
+          description="微观上，深色点与白底形成高对比；宏观上，大脑将其平滑感知为一种“纹理灰”。这种高频纹理比低频的平涂灰色更能勾勒出模块边界——在不增加色块厚重感的前提下，清晰地界定区域。"
         />
         <PrincipleCard
-          title="避免"脏"感"
+          title="避免“脏”感"
           keyword="Color Purity"
-          description="浅灰色（如 #F5F5F5）在低质量或 OLED 显示器上容易发灰、发脏。点阵使用纯黑+低透明度，让底层白色背光穿透，维持了画面的高亮度和色彩纯净度，有效避免"抹布屏"效应。"
+          description="浅灰色（如 #F5F5F5）在低质量或 OLED 显示器上容易发灰、发脏。点阵使用纯黑+低透明度，让底层白色背光穿透，维持了画面的高亮度和色彩纯净度，有效避免“抹布屏”效应。"
         />
       </div>
       <blockquote className="border-l-2 border-zinc-300 pl-4 text-sm text-muted-foreground italic">
@@ -284,7 +284,7 @@ function Chapter4() {
 function Chapter5() {
   return (
     <section className="space-y-6">
-      <ChapterHeader index={5} title="形态语言：形状如何改变"性格"" />
+      <ChapterHeader index={5} title="形态语言：形状如何改变“性格”" />
       <p className="text-muted-foreground leading-relaxed max-w-prose">
         形状的选择不只是美学偏好——它会从根本上改变界面传达的<strong className="text-foreground">情绪</strong>和<strong className="text-foreground">引导性</strong>。每种形状都有自己的"视觉性格"。
       </p>
@@ -293,7 +293,7 @@ function Chapter5() {
           title="圆形 Circle"
           personality="柔和 · 轻盈 · 自由"
           scene="创意画布、内容展示、品牌官网"
-          detail="无方向性，各向同性最强。人眼不会从圆点中读取出"对齐线"，因此对前景内容的干扰最小。"
+          detail="无方向性，各向同性最强。人眼不会从圆点中读取出“对齐线”，因此对前景内容的干扰最小。"
           visual={
             <svg className="h-full w-full fill-zinc-800/20">
               <pattern id="p-shape-circle" width="16" height="16" patternUnits="userSpaceOnUse">
@@ -307,7 +307,7 @@ function Chapter5() {
           title="十字 Cross"
           personality="工业 · 精密 · 定位"
           scene="精密工具、吸附坐标、工程界面"
-          detail="提供最强的中心定位感。四个方向的"边缘能量"比圆点更高，能精确暗示交汇坐标，适合做吸附的视觉引导。"
+          detail="提供最强的中心定位感。四个方向的“边缘能量”比圆点更高，能精确暗示交汇坐标，适合做吸附的视觉引导。"
           visual={
             <svg className="h-full w-full stroke-zinc-800/20" strokeWidth="0.6">
               <pattern id="p-shape-cross" width="16" height="16" patternUnits="userSpaceOnUse">
@@ -322,7 +322,7 @@ function Chapter5() {
           title="方形 Square"
           personality="像素 · 硬朗 · 数字"
           scene="代码编辑器、金融后台、数据面板"
-          detail="方形具有明确的水平/垂直边缘，会产生更强的"网格暗示"。在需要灵感迸发的自由画布中显得过于死板，但在工程场景中传达精密感。"
+          detail="方形具有明确的水平/垂直边缘，会产生更强的“网格暗示”。在需要灵感迸发的自由画布中显得过于死板，但在工程场景中传达精密感。"
           visual={
             <svg className="h-full w-full fill-zinc-800/20">
               <pattern id="p-shape-square" width="16" height="16" patternUnits="userSpaceOnUse">
@@ -483,7 +483,7 @@ function Chapter8() {
         <PrincipleCard
           title="视觉权重失控"
           keyword="Visual Mass Drift"
-          description="放大时，精致的"质感点"变成巨大的"圆饼"；缩小时，点变得斑驳或消失，失去空间坐标感。"
+          description="放大时，精致的“质感点”变成巨大的“圆饼”；缩小时，点变得斑驳或消失，失去空间坐标感。"
         />
         <PrincipleCard
           title="渲染性能"
